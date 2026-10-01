@@ -5,6 +5,7 @@
 #include <optional>
 #include <utility>
 #include <atomic>
+#include <span>
 
 namespace simple_undirected_graph
 {
@@ -239,6 +240,13 @@ namespace simple_undirected_graph
          */
         VertexId endpointV(EdgeId id) const;
 
+        // iteration //
+
+        // iterates over all existing vertices in the graph
+        std::span<const VertexId> existingVertices() const;
+        // iterates over all existing edges in the graph
+        std::span<const EdgeId> existingEdges() const;
+
     private:
         // internal storage types //
 
@@ -259,6 +267,7 @@ namespace simple_undirected_graph
         {
             std::optional<Vertex> vertex;
             std::size_t generation = 0;
+            std::size_t liveIndex = 0;
         };
 
         /**
@@ -279,6 +288,7 @@ namespace simple_undirected_graph
         {
             std::optional<Edge> edge;
             std::size_t generation = 0;
+            std::size_t liveIndex = 0;
         };
 
         // graph storage //
@@ -295,8 +305,8 @@ namespace simple_undirected_graph
         std::vector<std::size_t> freeVertexSlots_;
         std::vector<std::size_t> freeEdgeSlots_;
 
-        std::size_t vertexCount_ = 0;
-        std::size_t edgeCount_ = 0;
+        std::vector<VertexId> liveVertices_;
+        std::vector<EdgeId> liveEdges_;
     };
 
 #include "graph.tpp"
