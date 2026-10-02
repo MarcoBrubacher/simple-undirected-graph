@@ -1,31 +1,45 @@
 # simple-undirected-graph
 
-C++20 library for simple undirected graphs with typed properties, stable IDs, safe removal, and reusable storage.
+A small header-only C++20 library for finite simple undirected graphs.
 
-## Scope
+It provides typed vertex, edge, and graph properties, stable generation-safe IDs, reusable storage, adjacency queries, and efficient edge lookup.
 
-This library provides a small, focused container for finite simple undirected graphs.
+## Features
 
-It should support in the end:
-- typed vertex properties
-- typed edge properties
-- typed graph-level properties
+- typed vertex, edge, and graph properties
 - propertyless graphs through `NoProperties`
-- strong vertex and edge IDs
-- generation-safe IDs for detecting stale handles
+- strong `VertexId` and `EdgeId` handles
+- generation-safe stale-ID detection
+- graph-specific IDs
 - safe vertex and edge removal
 - reusable storage slots
 - adjacency queries
-- vertex and edge lookup
+- average O(1) edge lookup
 - live vertex and edge counts
 - iteration over existing vertices and edges
-- const-correct editable and read-only property access
+- const-correct property access
+- copy and move semantics
 
-The graph model is intentionally limited to simple undirected graphs:
+## Graph model
+
+The library represents finite simple undirected graphs:
+
 - no self-loops
 - no parallel edges
 - each undirected edge is stored once
 
-The library does not provide graph algorithms or other graph procedure, or even graph visualisations. Those are intended to be implemented separately using the graph API.
 
-The goal is to provide a small, predictable, reusable graph container that is easy to use in algorithmic, educational, visualization, and procedural-generation projects without depending on a large graph framework.
+## Requirements
+
+- C++20
+- CMake 3.21 or newer when building the repository
+
+## Design
+
+The graph uses reusable storage slots, generation-safe IDs, compact live-ID lists, adjacency-position bookkeeping, and an endpoint-pair hash table.
+
+For a detailed description of the internal representation, see [DESIGN.md](DESIGN.md).
+
+## Goal
+
+The goal is to provide a small and reusable graph container without depending on a large graph framework.

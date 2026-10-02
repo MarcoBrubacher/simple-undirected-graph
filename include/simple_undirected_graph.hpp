@@ -6,6 +6,8 @@
 #include <atomic>
 #include <utility>
 #include <span>
+#include <unordered_map>
+#include <functional>
 
 namespace simple_undirected_graph
 {
@@ -162,6 +164,7 @@ namespace simple_undirected_graph
          * @throws std::invalid_argument if the vertex does not exist
          */
         const std::vector<Adjacency> &adjacency(VertexId id) const;
+
         /**
          * returns editable access to the vertex data
          * this reference becomes invalid if the vertex is removed and may become invalid if vertex storage moves
@@ -279,6 +282,9 @@ namespace simple_undirected_graph
             VertexId endpointU;
             VertexId endpointV;
             EdgeData data;
+
+            std::size_t adjacencyIndexU;
+            std::size_t adjacencyIndexV;
         };
 
         /**
@@ -290,6 +296,21 @@ namespace simple_undirected_graph
             std::optional<Edge> edge;
             std::size_t generation = 0;
             std::size_t liveIndex = 0;
+        };
+
+        // represent an undirected edge by the slot indices of its two endpoint vertices
+        using EndpointPair = std::pair<std::size_t, std::size_t>;
+
+        // custom hasher used by std::unordered_map for EndpointPair keys
+        struct EndpointPairHasher
+        {
+            std::size_t operator()(const EndpointPair &pair) const
+            {
+                std::size_t hashA = std::hash<std::size_t>{}(pair.first);
+                std::size_t hashB = std::hash<std::size_t>{}(pair.second);
+
+                return hashA ^ (hashB << 1);
+            }
         };
 
         // graph storage //
@@ -308,6 +329,9 @@ namespace simple_undirected_graph
 
         std::vector<VertexId> liveVertices_;
         std::vector<EdgeId> liveEdges_;
+
+        // maps a normalized pair (since undirected graph) of endpoint slot indices directly to the corresponding EdgeId for an average edge lookup of O(1)
+        std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher> edgeLookup_;
     };
 }
-#include "graph.tpp"
+#include <simple_undirected_graph/detail/simple_undirected_graph.tpp>
