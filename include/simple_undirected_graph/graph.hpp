@@ -3,7 +3,6 @@
 #include <vector>
 #include <stdexcept>
 #include <optional>
-#include <utility>
 #include <atomic>
 #include <span>
 
@@ -29,10 +28,7 @@ namespace simple_undirected_graph
      * @tparam EdgeData type stored with each edge
      * @tparam GraphData type stored with the whole graph
      */
-    template <
-        typename VertexData = NoProperties,
-        typename EdgeData = NoProperties,
-        typename GraphData = NoProperties>
+    template <typename VertexData = NoProperties, typename EdgeData = NoProperties, typename GraphData = NoProperties>
     class Graph
     {
     public:
@@ -85,30 +81,34 @@ namespace simple_undirected_graph
         explicit Graph(GraphData graphData);
 
         /**
-         * creates a new graph by copying another graph (IDs from the original graph are not valid in the copy)
-         * @param other graph to copy
+         * creates a new graph by copying another graph
+         * IDs from the source graph are not valid in the copy
+         * @param sourceGraph graph to copy
          */
-        Graph(const Graph &other);
+        Graph(const Graph &sourceGraph);
 
         /**
-         * replaces this graph with a copy of another graph (IDs from the other graph are not valid in this graph after the copy)
-         * @param other graph to copy
+         * replaces this graph with a copy of another graph
+         * IDs from the source graph are not valid in this graph after the copy
+         * @param sourceGraph graph to copy
          * @return this graph
          */
-        Graph &operator=(const Graph &other);
+        Graph &operator=(const Graph &sourceGraph);
 
         /**
-         * creates a graph by taking ownership of another graph's contents (existing IDs continue to belong to the moved graph)
-         * @param other graph to move from
+         * creates a graph by taking ownership of another graph's contents
+         * existing IDs continue to belong to the moved graph
+         * @param sourceGraph graph to move from
          */
-        Graph(Graph &&other);
+        Graph(Graph &&sourceGraph);
 
         /**
-         * replaces this graph by taking ownership of another graph's contents (existing IDs continue to belong to the moved graph)
-         * @param other graph to move from
+         * replaces this graph by taking ownership of another graph's contents
+         * existing IDs continue to belong to the moved graph
+         * @param sourceGraph graph to move from
          * @return this graph
          */
-        Graph &operator=(Graph &&other);
+        Graph &operator=(Graph &&sourceGraph);
 
         // returns editable access to the graph data
         GraphData &graphData();
@@ -308,6 +308,5 @@ namespace simple_undirected_graph
         std::vector<VertexId> liveVertices_;
         std::vector<EdgeId> liveEdges_;
     };
-
-#include "graph.tpp"
 }
+#include "graph.tpp"
