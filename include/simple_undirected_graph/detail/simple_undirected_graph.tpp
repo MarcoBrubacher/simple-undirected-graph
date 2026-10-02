@@ -484,12 +484,106 @@ namespace simple_undirected_graph
         return true;
     }
 
-    // hasEdge TODO!!!!!
-    // findEdgeId TODO!!!!!
-    // &edgeData TODO!!!!!
-    // &edgeData TODO!!!!!
-    // endpointU TODO!!!!!
-    // endpointV TODO!!!!!
-    // existingVertices TODO!!!!!
-    // existingEdges TODO!!!!!
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    bool Graph<VertexData, EdgeData, GraphData>::hasEdge(VertexId u, VertexId v) const
+    {
+        if (!vertexExists(u) || !vertexExists(v))
+        {
+            throw std::invalid_argument("vertex does not exist");
+        }
+
+        // normalize the endpoint slot
+        std::size_t endpointIndexA = u.index;
+        std::size_t endpointIndexB = v.index;
+
+        if (endpointIndexA > endpointIndexB)
+        {
+            std::swap(endpointIndexA, endpointIndexB);
+        }
+
+        EndpointPair endpoints{endpointIndexA, endpointIndexB};
+        return edgeLookup_.find(endpoints) != edgeLookup_.end();
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::optional<typename Graph<VertexData, EdgeData, GraphData>::EdgeId>
+    Graph<VertexData, EdgeData, GraphData>::findEdgeId(VertexId u, VertexId v) const
+    {
+        if (!vertexExists(u) || !vertexExists(v))
+        {
+            throw std::invalid_argument("vertex does not exist");
+        }
+
+        std::size_t endpointIndexA = u.index;
+        std::size_t endpointIndexB = v.index;
+        if (endpointIndexA > endpointIndexB)
+        {
+            std::swap(endpointIndexA, endpointIndexB);
+        }
+        EndpointPair endpoints{endpointIndexA, endpointIndexB};
+
+        typename std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher>::const_iterator entry = edgeLookup_.find(endpoints);
+        if (entry == edgeLookup_.end())
+        {
+            return std::nullopt; // std::optional<EdgeId> has no value
+        }
+        return (*entry).second;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    EdgeData &Graph<VertexData, EdgeData, GraphData>::edgeData(EdgeId id)
+    {
+        if (!edgeExists(id))
+        {
+            throw std::invalid_argument("edge does not exist");
+        }
+
+        return (*edgeSlots_[id.index].edge).data;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    const EdgeData &Graph<VertexData, EdgeData, GraphData>::edgeData(EdgeId id) const
+    {
+        if (!edgeExists(id))
+        {
+            throw std::invalid_argument("edge does not exist");
+        }
+
+        return (*edgeSlots_[id.index].edge).data;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    typename Graph<VertexData, EdgeData, GraphData>::VertexId Graph<VertexData, EdgeData, GraphData>::endpointU(EdgeId id) const
+    {
+        if (!edgeExists(id))
+        {
+            throw std::invalid_argument("edge does not exist");
+        }
+
+        return (*edgeSlots_[id.index].edge).endpointU;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    typename Graph<VertexData, EdgeData, GraphData>::VertexId
+    Graph<VertexData, EdgeData, GraphData>::endpointV(EdgeId id) const
+    {
+        if (!edgeExists(id))
+        {
+            throw std::invalid_argument("edge does not exist");
+        }
+
+        return (*edgeSlots_[id.index].edge).endpointV;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::span<const typename Graph<VertexData, EdgeData, GraphData>::VertexId> Graph<VertexData, EdgeData, GraphData>::existingVertices() const
+    {
+        return liveVertices_;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::span<const typename Graph<VertexData, EdgeData, GraphData>::EdgeId> Graph<VertexData, EdgeData, GraphData>::existingEdges() const
+    {
+        return liveEdges_;
+    }
 }
