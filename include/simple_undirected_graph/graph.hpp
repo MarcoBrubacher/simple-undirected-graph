@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <optional>
 #include <atomic>
+#include <utility>
 #include <span>
 
 namespace simple_undirected_graph
