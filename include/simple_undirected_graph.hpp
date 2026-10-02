@@ -334,4 +334,4 @@ namespace simple_undirected_graph
         std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher> edgeLookup_;
     };
 }
-#include "graph.tpp"
+#include <simple_undirected_graph/detail/simple_undirected_graph.tpp>
