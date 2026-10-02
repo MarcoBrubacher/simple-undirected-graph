@@ -18,6 +18,87 @@ Dependency on the edge side:
 
 A `Vertex` stores its own data and a list of `Adjacency` entries. Each adjacency entry stores the neighbouring `VertexId` together with the connecting `EdgeId`. An `Edge` stores the IDs of its two endpoints and its edge data. The slot types then wrap the actual `Vertex` or `Edge`, therefore removed storage can later be reused instead of continuously growing the storage vectors.
 
+### Complete nesting overview
+
+```text
+Graph<VertexData, EdgeData, GraphData>
+|
+|-- graphId_
+|   `-- unique ID of this graph instance
+|
+|-- graphData_
+|   `-- GraphData
+|
+|-- vertexSlots_
+|   `-- std::vector<VertexSlot>
+|       `-- VertexSlot
+|           |-- vertex
+|           |   `-- std::optional<Vertex>
+|           |       `-- Vertex
+|           |           |-- data
+|           |           |   `-- VertexData
+|           |           `-- adjacency
+|           |               `-- std::vector<Adjacency>
+|           |                   `-- Adjacency
+|           |                       |-- neighbor
+|           |                       |   `-- VertexId
+|           |                       |       |-- graphId
+|           |                       |       |-- index
+|           |                       |       `-- generation
+|           |                       `-- edge
+|           |                           `-- EdgeId
+|           |                               |-- graphId
+|           |                               |-- index
+|           |                               `-- generation
+|           |-- generation
+|           `-- liveIndex
+|
+|-- edgeSlots_
+|   `-- std::vector<EdgeSlot>
+|       `-- EdgeSlot
+|           |-- edge
+|           |   `-- std::optional<Edge>
+|           |       `-- Edge
+|           |           |-- endpointU
+|           |           |   `-- VertexId
+|           |           |-- endpointV
+|           |           |   `-- VertexId
+|           |           `-- data
+|           |               `-- EdgeData
+|           |-- generation
+|           `-- liveIndex
+|
+|-- freeVertexSlots_
+|   `-- std::vector<std::size_t>
+|
+|-- freeEdgeSlots_
+|   `-- std::vector<std::size_t>
+|
+|-- liveVertices_
+|   `-- std::vector<VertexId>
+|
+`-- liveEdges_
+    `-- std::vector<EdgeId>
+```
+
+The essential relationships are:
+
+```text
+VertexId.index: points to a VertexSlot inside vertexSlots_
+
+EdgeId.index: points to an EdgeSlot inside edgeSlots_
+
+VertexSlot.liveIndex: points to this vertex's VertexId inside liveVertices_
+
+EdgeSlot.liveIndex: points to this edge's EdgeId inside liveEdges_
+
+freeVertexSlots_: emembers which vertexSlots_ indices can be reused
+
+freeEdgeSlots_: remembers which edgeSlots_ indices can be reused
+```
+
+The topology of the graph is represented through the adjacency lists stored inside the vertices. Each `Adjacency` connects one vertex to a neighbouring `VertexId` and stores the `EdgeId` representing that connection. The corresponding `Edge` independently stores both endpoint IDs and the edge data.
+
 ## IDs and slot reuse
 
 A `VertexId` or `EdgeId` contains a graph ID, slot index and generation. The slot index tells the graph where the element is stored. The generation changes when a removed slot is reused, therefore an old ID does not accidentally become valid again just because the same slot index is used for a new element. The graph ID additionally prevents IDs from one graph instance from being used with another graph.
