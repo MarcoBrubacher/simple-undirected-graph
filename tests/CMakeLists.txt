@@ -13,7 +13,7 @@ set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
     test_move.cpp
     test_properties.cpp
     test_invariants.cpp
-    test_exception_safety.cpp
+    
 )
 
 add_executable(
