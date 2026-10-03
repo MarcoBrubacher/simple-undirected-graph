@@ -1,5 +1,7 @@
 #include <utility>
 #include <iostream>
+#include <limits>
+#include <stdexcept>
 
 namespace simple_undirected_graph
 {
@@ -13,7 +15,6 @@ namespace simple_undirected_graph
     {
     }
 
-    // initialize all graph members by copying the source graph, while giving the copy a new graph ID
     template <typename VertexData, typename EdgeData, typename GraphData>
     Graph<VertexData, EdgeData, GraphData>::Graph(const Graph &sourceGraph) : graphId_(nextGraphId_++),
                                                                               graphData_(sourceGraph.graphData_),
@@ -70,11 +71,9 @@ namespace simple_undirected_graph
         }
     }
 
-    // replace this graph with an independent copy of the source graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     Graph<VertexData, EdgeData, GraphData> &Graph<VertexData, EdgeData, GraphData>::operator=(const Graph &sourceGraph)
     {
-        // if both names refer to the same graph there is nothing to copy
         if (this == &sourceGraph)
         {
             return *this;
@@ -83,13 +82,10 @@ namespace simple_undirected_graph
         // use the copy constructor so the copied graph gets a new graph ID and all IDs inside the copied storage are updated correctly
         Graph copiedGraph(sourceGraph);
 
-        // move the finished copy into the already existing graph
         *this = std::move(copiedGraph);
-
         return *this;
     }
 
-    // create a new graph by taking over the source graph's contents and existing graph ID
     template <typename VertexData, typename EdgeData, typename GraphData>
     Graph<VertexData, EdgeData, GraphData>::Graph(Graph &&sourceGraph) : graphId_(sourceGraph.graphId_),
                                                                          graphData_(std::move(sourceGraph.graphData_)),
@@ -105,17 +101,18 @@ namespace simple_undirected_graph
         sourceGraph.graphId_ = nextGraphId_++;
     }
 
-    // replace this graph by taking over the source graph's contents and graph ID
     template <typename VertexData, typename EdgeData, typename GraphData>
     Graph<VertexData, EdgeData, GraphData> &Graph<VertexData, EdgeData, GraphData>::operator=(Graph &&sourceGraph)
     {
-        // if both names refer to the same graph there is nothing to move
         if (this == &sourceGraph)
         {
             return *this;
         }
 
-        graphId_ = sourceGraph.graphId_;
+        // remember the graph ID that will be transferred
+        std::size_t sourceGraphId = sourceGraph.graphId_;
+
+        // do potentially throwing work before changing graph identity
         graphData_ = std::move(sourceGraph.graphData_);
 
         vertexSlots_ = std::move(sourceGraph.vertexSlots_);
@@ -129,7 +126,10 @@ namespace simple_undirected_graph
 
         edgeLookup_ = std::move(sourceGraph.edgeLookup_);
 
-        // this graph now uses the source graph's old ID, thus give the source graph a new ID so both graph objects do not have the same one
+        // commit the graph-ID transfer only after the state was moved successfully
+        graphId_ = sourceGraphId;
+
+        // source no longer owns that graph identity
         sourceGraph.graphId_ = nextGraphId_++;
 
         return *this;
@@ -172,33 +172,71 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    typename Graph<VertexData, EdgeData, GraphData>::VertexId Graph<VertexData, EdgeData, GraphData>::addVertex(VertexData vertexData)
+    typename Graph<VertexData, EdgeData, GraphData>::VertexId
+    Graph<VertexData, EdgeData, GraphData>::addVertex(VertexData vertexData)
     {
-        // create a vertex with the supplied data and an empty adjacency list; then move the supplied data into the stored vertex to avoid an unnecessary copy
+        // construct the vertex before changing the graph, if moving VertexData throws here, no graph state has changed yet
         Vertex v{std::move(vertexData), {}};
 
+        // determine which vertex slot will be used, but do not commit reuse yet
+        bool reusingSlot = !freeVertexSlots_.empty();
+
         std::size_t slotIndex;
-        // choose a slot index, if a free slot exists, reuse it otherwise append a new VertexSlot
-        if (!freeVertexSlots_.empty())
+        std::size_t generation;
+
+        if (reusingSlot)
         {
             slotIndex = freeVertexSlots_.back();
-            freeVertexSlots_.pop_back();
-            vertexSlots_[slotIndex].vertex = std::move(v);
-            // a slot was reused, thus the generation of the VertexSlot must increase
-            vertexSlots_[slotIndex].generation++;
+
+            // a slot was reused, thus the generation of the VertexSlot must increase (but first check for overflow)
+            if (vertexSlots_[slotIndex].generation == std::numeric_limits<std::size_t>::max())
+            {
+                throw std::overflow_error("vertex generation exhausted");
+            }
+
+            generation = vertexSlots_[slotIndex].generation + 1;
         }
         else
         {
             slotIndex = vertexSlots_.size();
             vertexSlots_.emplace_back();
-            vertexSlots_[slotIndex].vertex = std::move(v);
-            // generation stays the same so nothing to do
+            generation = vertexSlots_[slotIndex].generation;
         }
 
-        VertexId id{graphId_, slotIndex, vertexSlots_[slotIndex].generation};
-        // store the ID's position in the slot's liveIndex
-        vertexSlots_[slotIndex].liveIndex = liveVertices_.size();
-        liveVertices_.push_back(std::move(id));
+        VertexId id{graphId_, slotIndex, generation};
+
+        // remember where the new VertexId will be appended so partial changes can be undone and liveIndex can later be set directly
+        std::size_t oldLiveVerticesSize = liveVertices_.size();
+
+        try
+        {
+            vertexSlots_[slotIndex].vertex = std::move(v);
+            liveVertices_.push_back(id);
+        }
+        catch (...)
+        {
+            // undo all entries that were successfully completed
+            if (liveVertices_.size() > oldLiveVerticesSize)
+            {
+                liveVertices_.pop_back();
+            }
+            vertexSlots_[slotIndex].vertex.reset();
+            if (!reusingSlot)
+            {
+                vertexSlots_.pop_back();
+            }
+
+            throw;
+        }
+
+        // everything succeeded, so store the final live position and commit the slot reuse
+        vertexSlots_[slotIndex].liveIndex = oldLiveVerticesSize;
+
+        if (reusingSlot)
+        {
+            vertexSlots_[slotIndex].generation = generation;
+            freeVertexSlots_.pop_back();
+        }
 
         return liveVertices_.back();
     }
@@ -206,39 +244,34 @@ namespace simple_undirected_graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     bool Graph<VertexData, EdgeData, GraphData>::removeVertex(VertexId id)
     {
-        // check if it even exists
         if (!vertexExists(id))
         {
             return false;
         }
 
-        // since std::optional<Vertex> is a container that may hold a Vertex or may be empty, vertexSlots_[id.index].vertex returns std::optional<Vertex>
-        // by dereferencing this, it uses std::optional's overloaded operator*() to access the Vertex and through the Vertex one can access the adjacency list, where it can be checked if empty
-        // this allows iterating over it and remove all elements (edges) until it is empty to make sure the vertex is isolated and holds no more edges, and then it can be safely removed
+        // The slot stores the Vertex inside std::optional, so dereference it to access its adjacency list.
+        // removeEdge() removes the edge from both endpoints, so repeatedly removing adjacency.back() eventually isolates this vertex.
         while (!(*vertexSlots_[id.index].vertex).adjacency.empty())
         {
-            // take the last adjacency entry of this vertex and get the EdgeId stored inside it
-            // removeEdge() will delete that edge from both endpoint adjacency lists, so this vertex's adjacency list becomes one element smaller each loop
             removeEdge((*vertexSlots_[id.index].vertex).adjacency.back().edge);
         }
 
-        // get the position of this VertexId inside liveVertices_ and the position of the last live VertexId
         std::size_t liveIndex = vertexSlots_[id.index].liveIndex;
         std::size_t lastLiveIndex = liveVertices_.size() - 1;
 
-        // Erasing from the middle of liveVertices_ would shift later elements and make removal O(n) (because of the left shift of all other elements to the right).
-        // Since iteration order is not significant, swap-and-pop is applied instead:
-        // Swap-and-pop removes an element in O(1) by copying the last element over it and then removing the now-duplicate last element.
+        // Erasing from the middle of liveVertices_ would shift later elements and make removal O(n).
+        // Since iteration order is not significant, swap-and-pop is applied instead: (removes an element in O(1) by copying the last element over it and then removing the now-duplicate last element)
         if (liveIndex != lastLiveIndex)
         {
             VertexId movedId = liveVertices_.back();
             liveVertices_[liveIndex] = movedId;
+            // If another ID is moved into this position, its stored liveIndex must be updated.
             vertexSlots_[movedId.index].liveIndex = liveIndex;
         }
         liveVertices_.pop_back();
 
-        vertexSlots_[id.index].vertex.reset(); // destroy the Vertex stored in its slot
-        freeVertexSlots_.push_back(id.index);  // store the now empty slot so addVertex() can reuse it later
+        vertexSlots_[id.index].vertex.reset();
+        freeVertexSlots_.push_back(id.index);
 
         return true;
     }
@@ -304,7 +337,8 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool> Graph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v, EdgeData edgeData)
+    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool>
+    Graph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v, EdgeData edgeData)
     {
         if (!vertexExists(u) || !vertexExists(v))
         {
@@ -316,7 +350,7 @@ namespace simple_undirected_graph
             throw std::invalid_argument("self-loops are not allowed");
         }
 
-        // normalize the two endpoint slot indices so (U,V) and (V,U) result in the same EndpointPair
+        // normalize the two endpoint slot indices so (u,v) and (v,u) result in the same EndpointPair
         std::size_t endpointIndexA = u.index;
         std::size_t endpointIndexB = v.index;
 
@@ -324,9 +358,10 @@ namespace simple_undirected_graph
         {
             std::swap(endpointIndexA, endpointIndexB);
         }
+
         EndpointPair endpoints{endpointIndexA, endpointIndexB};
 
-        // check the lookup map whether this undirected edge already exists. If it exists leave its data unchanged and return its existing ID
+        // check whether the undirected edge already exists
         typename std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher>::iterator existingEdge = edgeLookup_.find(endpoints);
 
         if (existingEdge != edgeLookup_.end())
@@ -334,46 +369,96 @@ namespace simple_undirected_graph
             return {existingEdge->second, false};
         }
 
-        // access the adjacency lists of both endpoint vertices
         std::vector<Adjacency> &adjacencyU = (*vertexSlots_[u.index].vertex).adjacency;
         std::vector<Adjacency> &adjacencyV = (*vertexSlots_[v.index].vertex).adjacency;
 
+        // these are the positions where the new adjacency entries will be appended
+        std::size_t adjacencyIndexU = adjacencyU.size();
+        std::size_t adjacencyIndexV = adjacencyV.size();
+
+        // construct the edge before changing the graph, if moving EdgeData throws here, no graph state has changed yet
+        Edge edge{u, v, std::move(edgeData), adjacencyIndexU, adjacencyIndexV};
+
+        // determine which edge slot will be used, but do not commit reuse yet
+        bool reusingSlot = !freeEdgeSlots_.empty();
+
         std::size_t slotIndex;
-        // choose a slot index, if a free slot exists reuse it otherwise append a new EdgeSlot
-        if (!freeEdgeSlots_.empty())
+        std::size_t generation;
+
+        if (reusingSlot)
         {
             slotIndex = freeEdgeSlots_.back();
-            freeEdgeSlots_.pop_back();
 
-            // a slot was reused, thus the generation of the EdgeSlot must increase
-            edgeSlots_[slotIndex].generation++;
+            // prevent the generation from wrapping around and making a very old stale ID valid again
+            if (edgeSlots_[slotIndex].generation == std::numeric_limits<std::size_t>::max())
+            {
+                throw std::overflow_error("edge generation exhausted");
+            }
+
+            generation = edgeSlots_[slotIndex].generation + 1;
         }
         else
         {
             slotIndex = edgeSlots_.size();
             edgeSlots_.emplace_back();
-            // generation stays the same so nothing to do
+            generation = edgeSlots_[slotIndex].generation;
         }
 
-        EdgeId id{graphId_, slotIndex, edgeSlots_[slotIndex].generation};
+        EdgeId id{graphId_, slotIndex, generation};
 
-        // since the new adjacency entries will be appended at the end, the current sizes are exactly their future indices
-        std::size_t adjacencyIndexU = adjacencyU.size();
-        std::size_t adjacencyIndexV = adjacencyV.size();
+        // remember where the new EdgeId will be appended so partial changes can be undone and liveIndex can later be set directly
+        std::size_t oldLiveEdgesSize = liveEdges_.size();
 
-        // create the Edge and store where its two adjacency entries are located so they can later be removed directly in O(1)
-        Edge edge{u, v, std::move(edgeData), adjacencyIndexU, adjacencyIndexV};
-        edgeSlots_[slotIndex].edge = std::move(edge);
-        edgeSlots_[slotIndex].liveIndex = liveEdges_.size();
+        try
+        {
+            edgeSlots_[slotIndex].edge = std::move(edge);
+            liveEdges_.push_back(id);
 
-        liveEdges_.push_back(id);
+            adjacencyU.push_back(Adjacency{v, id});
+            adjacencyV.push_back(Adjacency{u, id});
 
-        // add one adjacency entry to each endpoint, each storing the neighbour and the connecting EdgeId
-        adjacencyU.push_back(Adjacency{v, id});
-        adjacencyV.push_back(Adjacency{u, id});
+            std::pair<typename std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher>::iterator, bool> insertionResult = edgeLookup_.emplace(endpoints, id);
 
-        // store the normalized endpoint pair in the lookup map so the edge can later be found in average O(1)
-        edgeLookup_.emplace(endpoints, id);
+            // the edge was checked before, so reaching this means the internal lookup state is inconsistent
+            if (!insertionResult.second)
+            {
+                throw std::logic_error("edge lookup insertion failed");
+            }
+        }
+        catch (...)
+        {
+            // undo all entries that were successfully completed
+
+            if (adjacencyV.size() > adjacencyIndexV)
+            {
+                adjacencyV.pop_back();
+            }
+            if (adjacencyU.size() > adjacencyIndexU)
+            {
+                adjacencyU.pop_back();
+            }
+            if (liveEdges_.size() > oldLiveEdgesSize)
+            {
+                liveEdges_.pop_back();
+            }
+
+            edgeSlots_[slotIndex].edge.reset();
+
+            if (!reusingSlot)
+            {
+                edgeSlots_.pop_back();
+            }
+            throw;
+        }
+
+        // everything succeeded, so store the final live position and commit the slot reuse
+        edgeSlots_[slotIndex].liveIndex = oldLiveEdgesSize;
+
+        if (reusingSlot)
+        {
+            edgeSlots_[slotIndex].generation = generation;
+            freeEdgeSlots_.pop_back();
+        }
 
         return {id, true};
     }
@@ -387,8 +472,6 @@ namespace simple_undirected_graph
         }
 
         Edge &edge = *edgeSlots_[id.index].edge;
-        // endpointU and endpointV are VertexIds, so their index members are the slot positions of the two connected vertices.
-        // use these indices to access the adjacency lists of both endpoint vertices
         std::vector<Adjacency> &adjacencyU = (*vertexSlots_[edge.endpointU.index].vertex).adjacency;
         std::vector<Adjacency> &adjacencyV = (*vertexSlots_[edge.endpointV.index].vertex).adjacency;
 
@@ -416,14 +499,13 @@ namespace simple_undirected_graph
         }
         adjacencyU.pop_back();
 
-        // do the same for endpointV
+        // repeat procedure for endpointV
         if (adjacencyIndexV != adjacencyV.size() - 1)
         {
             EdgeId movedId = adjacencyV.back().edge;
             adjacencyV[adjacencyIndexV] = std::move(adjacencyV.back());
             Edge &movedEdge = *edgeSlots_[movedId.index].edge;
 
-            // same as above
             if (movedEdge.endpointU == edge.endpointV)
             {
                 movedEdge.adjacencyIndexU = adjacencyIndexV;
@@ -444,10 +526,8 @@ namespace simple_undirected_graph
             std::swap(endpointIndexA, endpointIndexB);
         }
         EndpointPair endpoints{endpointIndexA, endpointIndexB};
+        edgeLookup_.erase(endpoints);
 
-        edgeLookup_.erase(endpoints); // remove the edge from the average O(1) lookup map
-
-        // get the position of this EdgeId inside liveEdges_
         std::size_t liveIndex = edgeSlots_[id.index].liveIndex;
         std::size_t lastLiveIndex = liveEdges_.size() - 1;
 
@@ -461,8 +541,8 @@ namespace simple_undirected_graph
         }
         liveEdges_.pop_back();
 
-        edgeSlots_[id.index].edge.reset();  // destroy the Edge stored in its slot
-        freeEdgeSlots_.push_back(id.index); // store the now empty slot so addEdge can reuse it later in the freeEdgeSlots
+        edgeSlots_[id.index].edge.reset();
+        freeEdgeSlots_.push_back(id.index);
 
         return true;
     }
@@ -476,7 +556,6 @@ namespace simple_undirected_graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     bool Graph<VertexData, EdgeData, GraphData>::edgeExists(EdgeId id) const
     {
-        // same idea as in vertexExists
         if (id.graphId != graphId_ || id.index >= edgeSlots_.size() || !edgeSlots_[id.index].edge.has_value() || id.generation != edgeSlots_[id.index].generation)
         {
             return false;
@@ -492,10 +571,9 @@ namespace simple_undirected_graph
             throw std::invalid_argument("vertex does not exist");
         }
 
-        // normalize the endpoint slot
+        // keep the smaller vertex index first so both endpoint orders use the same key
         std::size_t endpointIndexA = u.index;
         std::size_t endpointIndexB = v.index;
-
         if (endpointIndexA > endpointIndexB)
         {
             std::swap(endpointIndexA, endpointIndexB);
