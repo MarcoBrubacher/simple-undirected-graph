@@ -15,19 +15,14 @@ namespace simple_undirected_graph
 {
     /**
      * empty property type used when no data is attached
-     * Graph<> uses NoProperties for vertex, edge, and graph data
      */
     struct NoProperties
     {
     };
 
     /**
-     * finite simple undirected graph with typed vertex, edge, and graph data, where
+     * finite simple undirected graph with typed vertex, edge, and graph data
      * vertices and edges may carry user-defined data, while graph-level data is stored once for the whole graph
-     *
-     * vertex and edge IDs belong to one graph instance and are generation-safe
-     * removed storage may be reused without making stale IDs valid again
-     * topology is modified only through the graph API
      *
      * @tparam VertexData type stored with each vertex
      * @tparam EdgeData type stored with each edge
@@ -374,7 +369,8 @@ namespace simple_undirected_graph
         using EndpointPair = std::pair<std::size_t, std::size_t>;
         EndpointPair normalizeEndpoints(VertexId u, VertexId v) const noexcept;
 
-        // custom hasher used by std::unordered_map for EndpointPair keys
+        // incremental hash combiner for composite keys, folds each component into a running hash seed
+        static std::size_t combineHash(std::size_t seed, std::size_t value) noexcept;
         struct EndpointPairHasher
         {
             std::size_t operator()(const EndpointPair &pair) const noexcept;

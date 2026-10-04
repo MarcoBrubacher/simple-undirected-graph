@@ -16,22 +16,27 @@ namespace simple_undirected_graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     std::size_t Graph<VertexData, EdgeData, GraphData>::VertexIdHash::operator()(const VertexId &id) const noexcept
     {
-        std::size_t graphHash = std::hash<std::size_t>{}(id.graphId);
-        std::size_t indexHash = std::hash<std::size_t>{}(id.index);
-        std::size_t generationHash = std::hash<std::size_t>{}(id.generation);
+        std::size_t seed = 0;
 
-        return graphHash ^ (indexHash << 1) ^ (generationHash << 2);
+        seed = Graph::combineHash(seed, id.graphId);
+        seed = Graph::combineHash(seed, id.index);
+        seed = Graph::combineHash(seed, id.generation);
+
+        return seed;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
     std::size_t Graph<VertexData, EdgeData, GraphData>::EdgeIdHash::operator()(const EdgeId &id) const noexcept
     {
-        std::size_t graphHash = std::hash<std::size_t>{}(id.graphId);
-        std::size_t indexHash = std::hash<std::size_t>{}(id.index);
-        std::size_t generationHash = std::hash<std::size_t>{}(id.generation);
+        std::size_t seed = 0;
 
-        return graphHash ^ (indexHash << 1) ^ (generationHash << 2);
+        seed = Graph::combineHash(seed, id.graphId);
+        seed = Graph::combineHash(seed, id.index);
+        seed = Graph::combineHash(seed, id.generation);
+
+        return seed;
     }
+
     template <typename VertexData, typename EdgeData, typename GraphData>
     Graph<VertexData, EdgeData, GraphData>::Graph() : graphId_(nextGraphId_++) {}
 
@@ -672,11 +677,27 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
+    std::size_t Graph<VertexData, EdgeData, GraphData>::combineHash(std::size_t seed, std::size_t value) noexcept
+    {
+        // simple baseline mixer. TODO: replace after benchmarking hash strategies
+        constexpr std::size_t bitCount = sizeof(std::size_t) * 8;
+
+        value ^= value >> (bitCount / 2);
+
+        seed ^= value;
+        seed += (seed << 5) + (seed >> 3) + 1;
+
+        return seed;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
     std::size_t Graph<VertexData, EdgeData, GraphData>::EndpointPairHasher::operator()(const EndpointPair &pair) const noexcept
     {
-        std::size_t hashA = std::hash<std::size_t>{}(pair.first);
-        std::size_t hashB = std::hash<std::size_t>{}(pair.second);
+        std::size_t seed = 0;
 
-        return hashA ^ (hashB << 1);
+        seed = Graph::combineHash(seed, pair.first);
+        seed = Graph::combineHash(seed, pair.second);
+
+        return seed;
     }
 }
