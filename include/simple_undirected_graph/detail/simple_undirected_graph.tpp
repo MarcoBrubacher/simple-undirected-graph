@@ -318,14 +318,14 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    const std::vector<typename Graph<VertexData, EdgeData, GraphData>::Adjacency> &
-    Graph<VertexData, EdgeData, GraphData>::adjacency(VertexId id) const
+    std::span<const typename Graph<VertexData, EdgeData, GraphData>::Adjacency> Graph<VertexData, EdgeData, GraphData>::adjacency(VertexId id) const
     {
         if (!vertexExists(id))
         {
             throw std::invalid_argument("vertex does not exist");
         }
-        return (*vertexSlots_[id.index].vertex).adjacency;
+
+        return std::span<const Adjacency>{(*vertexSlots_[id.index].vertex).adjacency};
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>

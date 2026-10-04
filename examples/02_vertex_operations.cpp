@@ -41,5 +41,9 @@ int main()
     // prints the number of vertices remaining in the graph
     std::cout << "Vertex count after removal: " << graph.vertexCount() << '\n';
 
+    // creates a propertyless graph and adds a vertex without supplying vertex data
+    simple_undirected_graph::Graph<> propertylessGraph;
+    propertylessGraph.addVertex();
+
     return 0;
 }
