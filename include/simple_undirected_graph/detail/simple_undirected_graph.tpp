@@ -448,7 +448,7 @@ namespace simple_undirected_graph
         catch (...)
         {
             // undo all entries that were successfully completed
-
+            
             if (adjacencyV.size() > adjacencyIndexV)
             {
                 adjacencyV.pop_back();
@@ -651,26 +651,15 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    typename Graph<VertexData, EdgeData, GraphData>::VertexId Graph<VertexData, EdgeData, GraphData>::endpointU(EdgeId id) const
+    std::pair<typename Graph<VertexData, EdgeData, GraphData>::VertexId, typename Graph<VertexData, EdgeData, GraphData>::VertexId> Graph<VertexData, EdgeData, GraphData>::endpoints(EdgeId id) const
     {
         if (!edgeExists(id))
         {
             throw std::invalid_argument("edge does not exist");
         }
+        const Edge &edge = *edgeSlots_[id.index].edge;
 
-        return (*edgeSlots_[id.index].edge).endpointU;
-    }
-
-    template <typename VertexData, typename EdgeData, typename GraphData>
-    typename Graph<VertexData, EdgeData, GraphData>::VertexId
-    Graph<VertexData, EdgeData, GraphData>::endpointV(EdgeId id) const
-    {
-        if (!edgeExists(id))
-        {
-            throw std::invalid_argument("edge does not exist");
-        }
-
-        return (*edgeSlots_[id.index].edge).endpointV;
+        return {edge.endpointU, edge.endpointV};
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>

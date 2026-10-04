@@ -270,14 +270,10 @@ namespace simple_undirected_graph
         const EdgeData &edgeData(EdgeId id) const;
 
         /**
+         * returns both endpoints of an edge, since endpoint order has no directional meaning
          * @throws std::invalid_argument if the edge does not exist
          */
-        VertexId endpointU(EdgeId id) const;
-
-        /**
-         * @throws std::invalid_argument if the edge does not exist
-         */
-        VertexId endpointV(EdgeId id) const;
+        std::pair<VertexId, VertexId> endpoints(EdgeId id) const;
 
         // iteration //
 
