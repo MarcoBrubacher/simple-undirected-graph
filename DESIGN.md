@@ -22,7 +22,7 @@ The graph additionally keeps an `edgeLookup_` hash table. Its key is a normalize
 
 ### Complete nesting overview
 
-```text 
+```text
 Graph<VertexData, EdgeData, GraphData>
 |
 |-- graphId_
@@ -116,7 +116,7 @@ The additional `edgeLookup_` provides a direct lookup from two endpoint vertices
 
 ## IDs and slot reuse
 
-A `VertexId` or `EdgeId` contains a graph ID, slot index and generation. The slot index tells the graph where the element is stored. The generation changes when a removed slot is reused, therefore an old ID does not accidentally become valid again just because the same slot index is used for a new element. The graph ID additionally prevents IDs from one graph instance from being used with another graph.
+A `VertexId` or `EdgeId` internally contains a graph ID, slot index and generation. These values are private and IDs are used as opaque handles by callers. The slot index tells the graph where the element is stored. The generation changes when a removed slot is reused, therefore an old ID does not accidentally become valid again just because the same slot index is used for a new element. The graph ID additionally prevents IDs from one graph instance from being used with another graph.
 
 ## Adding and removing
 
@@ -124,13 +124,15 @@ When adding a vertex or edge, the graph first checks whether a free slot already
 
 When an edge is added, one adjacency entry is appended to each endpoint. The edge stores the positions of these entries in `adjacencyIndexU` and `adjacencyIndexV`, and its normalized endpoint pair is inserted into `edgeLookup_`. When an edge is removed, its adjacency entries can therefore be accessed directly. If swap-and-pop moves another adjacency entry into the removed position, the corresponding moved edge has its stored adjacency index updated. The removed edge's endpoint pair is also removed from `edgeLookup_`.
 
+The `addEdge()` overloads use one shared private insertion function. Edge data is only copied or moved after the endpoints have been validated and the graph has confirmed that the edge does not already exist.
+
 ## Live IDs
 
 The slot lists can contain empty entries after removals, so the graph also keeps `liveVertices_` and `liveEdges_`. These lists contain only IDs of elements that currently exist. Each occupied slot remembers its position inside the matching live-ID list through `liveIndex`. Thus an ID can be removed from that list using swap-and-pop instead of shifting every later element.
 
 ## Edge lookup
 
-`edgeLookup_` is an `std::unordered_map` from an `EndpointPair` to an `EdgeId`. An `EndpointPair` contains the slot indices of the two endpoint vertices. Before the pair is used, its indices are normalized so the smaller index comes first. This is essential, since the graph is undirected and `(u, v)` must represent the same edge as `(v, u)`.
+`edgeLookup_` is an `std::unordered_map` from an `EndpointPair` to an `EdgeId`. An `EndpointPair` contains the slot indices of the two endpoint vertices. The `normalizeEndpoints()` helper places the smaller index first before the pair is used. This is essential, since the graph is undirected and `(u, v)` must represent the same edge as `(v, u)`.
 
 `EndpointPairHasher` converts an `EndpointPair` into a hash value used internally by the unordered map. The hash does not itself identify the edge; it only allows the map to locate the bucket in which the endpoint pair may be stored. The actual key remains the `EndpointPair` and the stored value remains the corresponding `EdgeId`.
 
@@ -138,8 +140,12 @@ The lookup table allows the graph to check whether two vertices are connected an
 
 ## Iteration
 
-`vertices()` and `edges()` return read-only views over the live-ID lists. This means iteration only visits elements that actually exist, while the slot lists remain responsible for storage and reuse, thus enabling fast iteration over the existing vertices and edges.
+`vertices()` and `edges()` return read-only `std::span` views over the live-ID lists. This means iteration only visits elements that actually exist without copying the ID lists. The returned views remain valid until the graph topology is modified.
 
 ## Copy and move
 
-When a graph is copied, the new graph gets its own graph ID. The copied internal IDs are then updated to use that new graph ID, therefore the copy becomes independent from the original graph. The `EdgeId` values stored inside `edgeLookup_` are updated as well, while the normalized endpoint slot pairs remain unchanged because the copied slot positions stay the same. When a graph is moved, its contents and existing graph ID move together, including the edge lookup table. Clearing a graph also gives it a new graph ID, therefore all IDs created before the clear become invalid.
+When a graph is copied, the new graph gets its own graph ID. The copied internal IDs are then updated to use that new graph ID, therefore the copy becomes independent from the original graph. The `EdgeId` values stored inside `edgeLookup_` are updated as well, while the normalized endpoint slot pairs remain unchanged because the copied slot positions stay the same.
+
+When a graph is moved, its contents and existing graph ID move together, including the edge lookup table. Existing IDs therefore continue to belong to the moved graph. The source graph is left empty and receives a new graph ID so it can be reused independently.
+
+Clearing a graph also gives it a new graph ID, therefore all IDs created before the clear become invalid.
