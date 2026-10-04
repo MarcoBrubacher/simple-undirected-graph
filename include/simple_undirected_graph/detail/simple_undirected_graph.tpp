@@ -357,8 +357,20 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool>
-    Graph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v, EdgeData edgeData)
+    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool> Graph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v, const EdgeData &edgeData)
+    {
+        return insertEdge(u, v, edgeData);
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool> Graph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v, EdgeData &&edgeData)
+    {
+        return insertEdge(u, v, std::move(edgeData));
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    template <typename T>
+    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool> Graph<VertexData, EdgeData, GraphData>::insertEdge(VertexId u, VertexId v, T &&edgeData)
     {
         if (!vertexExists(u) || !vertexExists(v))
         {
@@ -397,7 +409,7 @@ namespace simple_undirected_graph
         std::size_t adjacencyIndexV = adjacencyV.size();
 
         // construct the edge before changing the graph, if moving EdgeData throws here, no graph state has changed yet
-        Edge edge{u, v, std::move(edgeData), adjacencyIndexU, adjacencyIndexV};
+        Edge edge{u, v, std::forward<T>(edgeData), adjacencyIndexU, adjacencyIndexV};
 
         // determine which edge slot will be used, but do not commit reuse yet
         bool reusingSlot = !freeEdgeSlots_.empty();
@@ -448,7 +460,7 @@ namespace simple_undirected_graph
         catch (...)
         {
             // undo all entries that were successfully completed
-            
+
             if (adjacencyV.size() > adjacencyIndexV)
             {
                 adjacencyV.pop_back();

@@ -223,7 +223,18 @@ namespace simple_undirected_graph
          * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
          * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
          */
-        std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v, EdgeData edgeData);
+        std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v, const EdgeData &edgeData);
+
+        /**
+         * creates an edge with the supplied edge data
+         * existing edge data is left unchanged if the edge already exists
+         * @param u first endpoint
+         * @param v second endpoint
+         * @param edgeData data moved into the edge
+         * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
+         * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
+         */
+        std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v, EdgeData &&edgeData);
 
         /**
          * removed storage may be reused with a new generation (IDs of other existing edges remain unchanged)
@@ -283,7 +294,9 @@ namespace simple_undirected_graph
         std::span<const EdgeId> edges() const;
 
     private:
-        // internal storage types //
+        // shared insertion logic for the EdgeData overloads. forwarding preserves whether the data should be copied or moved until insertion is confirmed
+        template <typename T>
+        std::pair<EdgeId, bool> insertEdge(VertexId u, VertexId v, T &&edgeData);
 
         /**
          * vertex stored inside a vertex slot, which owns its data and adjacency list
