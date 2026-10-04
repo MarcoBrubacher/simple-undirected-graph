@@ -139,19 +139,19 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    GraphData &Graph<VertexData, EdgeData, GraphData>::graphData()
+    GraphData &Graph<VertexData, EdgeData, GraphData>::graphData() noexcept
     {
         return graphData_;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    const GraphData &Graph<VertexData, EdgeData, GraphData>::graphData() const
+    const GraphData &Graph<VertexData, EdgeData, GraphData>::graphData() const noexcept
     {
         return graphData_;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    void Graph<VertexData, EdgeData, GraphData>::clear()
+    void Graph<VertexData, EdgeData, GraphData>::clear() noexcept
     {
         vertexSlots_.clear();
         edgeSlots_.clear();
@@ -169,7 +169,7 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    bool Graph<VertexData, EdgeData, GraphData>::empty() const
+    bool Graph<VertexData, EdgeData, GraphData>::empty() const noexcept
     {
         return liveVertices_.empty();
     }
@@ -287,13 +287,13 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::size_t Graph<VertexData, EdgeData, GraphData>::vertexCount() const
+    std::size_t Graph<VertexData, EdgeData, GraphData>::vertexCount() const noexcept
     {
         return liveVertices_.size();
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    bool Graph<VertexData, EdgeData, GraphData>::vertexExists(VertexId id) const
+    bool Graph<VertexData, EdgeData, GraphData>::vertexExists(VertexId id) const noexcept
     {
         // validate the ID using cheap checks first and only access the slot once the index is known to be valid
         // check graphId before touching vertexSlots_, then check the index bounds, and only then inspect the optional stored in that slot, since inspecting a slot is the most expensive
@@ -559,13 +559,13 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::size_t Graph<VertexData, EdgeData, GraphData>::edgeCount() const
+    std::size_t Graph<VertexData, EdgeData, GraphData>::edgeCount() const noexcept
     {
         return liveEdges_.size();
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    bool Graph<VertexData, EdgeData, GraphData>::edgeExists(EdgeId id) const
+    bool Graph<VertexData, EdgeData, GraphData>::edgeExists(EdgeId id) const noexcept
     {
         if (id.graphId != graphId_ || id.index >= edgeSlots_.size() || !edgeSlots_[id.index].edge.has_value() || id.generation != edgeSlots_[id.index].generation)
         {
@@ -636,19 +636,19 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::span<const typename Graph<VertexData, EdgeData, GraphData>::VertexId> Graph<VertexData, EdgeData, GraphData>::vertices() const
+    std::span<const typename Graph<VertexData, EdgeData, GraphData>::VertexId> Graph<VertexData, EdgeData, GraphData>::vertices() const noexcept
     {
         return liveVertices_;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::span<const typename Graph<VertexData, EdgeData, GraphData>::EdgeId> Graph<VertexData, EdgeData, GraphData>::edges() const
+    std::span<const typename Graph<VertexData, EdgeData, GraphData>::EdgeId> Graph<VertexData, EdgeData, GraphData>::edges() const noexcept
     {
         return liveEdges_;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    typename Graph<VertexData, EdgeData, GraphData>::EndpointPair Graph<VertexData, EdgeData, GraphData>::normalizeEndpoints(VertexId u, VertexId v) const
+    typename Graph<VertexData, EdgeData, GraphData>::EndpointPair Graph<VertexData, EdgeData, GraphData>::normalizeEndpoints(VertexId u, VertexId v) const noexcept
     {
         std::size_t endpointIndexA = u.index;
         std::size_t endpointIndexB = v.index;
