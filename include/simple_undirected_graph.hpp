@@ -8,6 +8,7 @@
 #include <span>
 #include <unordered_map>
 #include <functional>
+#include <concepts>
 
 namespace simple_undirected_graph
 {
@@ -43,11 +44,18 @@ namespace simple_undirected_graph
          */
         struct VertexId
         {
+        public:
+            bool operator==(const VertexId &) const = default;
+
+        private:
+            // allows Graph to access ID internals while keeping them hidden from callers
+            friend class Graph;
+
+            VertexId(std::size_t graphId, std::size_t index, std::size_t generation);
+
             std::size_t graphId;
             std::size_t index;
             std::size_t generation;
-
-            bool operator==(const VertexId &) const = default;
         };
 
         /**
@@ -56,11 +64,18 @@ namespace simple_undirected_graph
          */
         struct EdgeId
         {
+        public:
+            bool operator==(const EdgeId &) const = default;
+
+        private:
+            // allows Graph to access ID internals while keeping them hidden from callers
+            friend class Graph;
+
+            EdgeId(std::size_t graphId, std::size_t index, std::size_t generation);
+
             std::size_t graphId;
             std::size_t index;
             std::size_t generation;
-
-            bool operator==(const EdgeId &) const = default;
         };
 
         /**
@@ -133,6 +148,15 @@ namespace simple_undirected_graph
         // vertex operations //
 
         /**
+         * creates a vertex without properties
+         * @return ID of the new vertex
+         */
+        VertexId addVertex()
+            requires std::same_as<VertexData, NoProperties>;
+
+        /**
+         * creates a vertex with the supplied vertex data
+         * @param vertexData data stored with the vertex
          * @return ID of the new vertex
          */
         VertexId addVertex(VertexData vertexData);
@@ -184,7 +208,19 @@ namespace simple_undirected_graph
         // edge operations //
 
         /**
+         * creates an edge without properties
+         * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
+         * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
+         */
+        std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v)
+            requires std::same_as<EdgeData, NoProperties>;
+
+        /**
+         * creates an edge with the supplied edge data
          * existing edge data is left unchanged if the edge already exists
+         * @param u first endpoint
+         * @param v second endpoint
+         * @param edgeData data stored with the edge
          * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
          * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
          */
