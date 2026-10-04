@@ -116,6 +116,7 @@ namespace simple_undirected_graph
         /**
          * creates a graph by taking ownership of another graph's contents
          * existing IDs continue to belong to the moved graph
+         * the source graph is left empty with a new graph identity
          * @param sourceGraph graph to move from
          */
         Graph(Graph &&sourceGraph);
@@ -344,6 +345,7 @@ namespace simple_undirected_graph
 
         // represent an undirected edge by the slot indices of its two endpoint vertices
         using EndpointPair = std::pair<std::size_t, std::size_t>;
+        EndpointPair normalizeEndpoints(VertexId u, VertexId v) const;
 
         // custom hasher used by std::unordered_map for EndpointPair keys
         struct EndpointPairHasher
