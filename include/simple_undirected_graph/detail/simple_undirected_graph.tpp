@@ -1,5 +1,4 @@
 #include <utility>
-#include <iostream>
 #include <limits>
 #include <stdexcept>
 
@@ -102,8 +101,8 @@ namespace simple_undirected_graph
                                                                          liveEdges_(std::move(sourceGraph.liveEdges_)),
                                                                          edgeLookup_(std::move(sourceGraph.edgeLookup_))
     {
-        // give the moved-from graph a fresh ID because its old ID was transferred to the new graph
-        sourceGraph.graphId_ = nextGraphId_++;
+        // leave the moved-from graph empty and give it a fresh graph ID
+        sourceGraph.clear();
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
@@ -114,7 +113,7 @@ namespace simple_undirected_graph
             return *this;
         }
 
-        // remember the graph ID that will be transferred
+        // store the graph ID that will be transferred
         std::size_t sourceGraphId = sourceGraph.graphId_;
 
         // do potentially throwing work before changing graph identity
@@ -131,11 +130,10 @@ namespace simple_undirected_graph
 
         edgeLookup_ = std::move(sourceGraph.edgeLookup_);
 
-        // commit the graph-ID transfer only after the state was moved successfully
         graphId_ = sourceGraphId;
 
-        // source no longer owns that graph identity
-        sourceGraph.graphId_ = nextGraphId_++;
+        // leave the moved-from graph empty and give it a fresh graph ID
+        sourceGraph.clear();
 
         return *this;
     }
@@ -382,16 +380,7 @@ namespace simple_undirected_graph
             throw std::invalid_argument("self-loops are not allowed");
         }
 
-        // normalize the two endpoint slot indices so (u,v) and (v,u) result in the same EndpointPair
-        std::size_t endpointIndexA = u.index;
-        std::size_t endpointIndexB = v.index;
-
-        if (endpointIndexA > endpointIndexB)
-        {
-            std::swap(endpointIndexA, endpointIndexB);
-        }
-
-        EndpointPair endpoints{endpointIndexA, endpointIndexB};
+        EndpointPair endpoints = normalizeEndpoints(u, v);
 
         // check whether the undirected edge already exists
         typename std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher>::iterator existingEdge = edgeLookup_.find(endpoints);
@@ -460,7 +449,6 @@ namespace simple_undirected_graph
         catch (...)
         {
             // undo all entries that were successfully completed
-
             if (adjacencyV.size() > adjacencyIndexV)
             {
                 adjacencyV.pop_back();
@@ -549,16 +537,7 @@ namespace simple_undirected_graph
         }
         adjacencyV.pop_back();
 
-        // normalize the endpoint slot indices so the same EndpointPair used during addEdge can be removed from edgeLookup_
-        std::size_t endpointIndexA = edge.endpointU.index;
-        std::size_t endpointIndexB = edge.endpointV.index;
-
-        if (endpointIndexA > endpointIndexB)
-        {
-            std::swap(endpointIndexA, endpointIndexB);
-        }
-        EndpointPair endpoints{endpointIndexA, endpointIndexB};
-        edgeLookup_.erase(endpoints);
+        edgeLookup_.erase(normalizeEndpoints(edge.endpointU, edge.endpointV));
 
         std::size_t liveIndex = edgeSlots_[id.index].liveIndex;
         std::size_t lastLiveIndex = liveEdges_.size() - 1;
@@ -602,17 +581,7 @@ namespace simple_undirected_graph
         {
             throw std::invalid_argument("vertex does not exist");
         }
-
-        // keep the smaller vertex index first so both endpoint orders use the same key
-        std::size_t endpointIndexA = u.index;
-        std::size_t endpointIndexB = v.index;
-        if (endpointIndexA > endpointIndexB)
-        {
-            std::swap(endpointIndexA, endpointIndexB);
-        }
-
-        EndpointPair endpoints{endpointIndexA, endpointIndexB};
-        return edgeLookup_.find(endpoints) != edgeLookup_.end();
+        return edgeLookup_.find(normalizeEndpoints(u, v)) != edgeLookup_.end();
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
@@ -624,15 +593,7 @@ namespace simple_undirected_graph
             throw std::invalid_argument("vertex does not exist");
         }
 
-        std::size_t endpointIndexA = u.index;
-        std::size_t endpointIndexB = v.index;
-        if (endpointIndexA > endpointIndexB)
-        {
-            std::swap(endpointIndexA, endpointIndexB);
-        }
-        EndpointPair endpoints{endpointIndexA, endpointIndexB};
-
-        typename std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher>::const_iterator entry = edgeLookup_.find(endpoints);
+        typename std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher>::const_iterator entry = edgeLookup_.find(normalizeEndpoints(u, v));
         if (entry == edgeLookup_.end())
         {
             return std::nullopt; // std::optional<EdgeId> has no value
@@ -684,5 +645,19 @@ namespace simple_undirected_graph
     std::span<const typename Graph<VertexData, EdgeData, GraphData>::EdgeId> Graph<VertexData, EdgeData, GraphData>::edges() const
     {
         return liveEdges_;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    typename Graph<VertexData, EdgeData, GraphData>::EndpointPair Graph<VertexData, EdgeData, GraphData>::normalizeEndpoints(VertexId u, VertexId v) const
+    {
+        std::size_t endpointIndexA = u.index;
+        std::size_t endpointIndexB = v.index;
+
+        if (endpointIndexA > endpointIndexB)
+        {
+            std::swap(endpointIndexA, endpointIndexB);
+        }
+
+        return {endpointIndexA, endpointIndexB};
     }
 }
