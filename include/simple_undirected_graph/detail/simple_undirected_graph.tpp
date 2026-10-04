@@ -6,14 +6,19 @@
 namespace simple_undirected_graph
 {
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::Graph() : graphId_(nextGraphId_++)
-    {
-    }
+    Graph<VertexData, EdgeData, GraphData>::VertexId::VertexId(std::size_t graphId, std::size_t index, std::size_t generation) : graphId(graphId),
+                                                                                                                                 index(index),
+                                                                                                                                 generation(generation) {}
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::Graph(GraphData graphData) : graphId_(nextGraphId_++), graphData_(std::move(graphData))
-    {
-    }
+    Graph<VertexData, EdgeData, GraphData>::EdgeId::EdgeId(std::size_t graphId, std::size_t index, std::size_t generation) : graphId(graphId),
+                                                                                                                             index(index),
+                                                                                                                             generation(generation) {}
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    Graph<VertexData, EdgeData, GraphData>::Graph() : graphId_(nextGraphId_++) {}
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    Graph<VertexData, EdgeData, GraphData>::Graph(GraphData graphData) : graphId_(nextGraphId_++), graphData_(std::move(graphData)) {}
 
     template <typename VertexData, typename EdgeData, typename GraphData>
     Graph<VertexData, EdgeData, GraphData>::Graph(const Graph &sourceGraph) : graphId_(nextGraphId_++),
@@ -171,9 +176,16 @@ namespace simple_undirected_graph
         return liveVertices_.empty();
     }
 
+    // allows addVertex() for graphs whose vertex data type is NoProperties
     template <typename VertexData, typename EdgeData, typename GraphData>
-    typename Graph<VertexData, EdgeData, GraphData>::VertexId
-    Graph<VertexData, EdgeData, GraphData>::addVertex(VertexData vertexData)
+    typename Graph<VertexData, EdgeData, GraphData>::VertexId Graph<VertexData, EdgeData, GraphData>::addVertex()
+        requires std::same_as<VertexData, NoProperties>
+    {
+        return addVertex(NoProperties{});
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    typename Graph<VertexData, EdgeData, GraphData>::VertexId Graph<VertexData, EdgeData, GraphData>::addVertex(VertexData vertexData)
     {
         // construct the vertex before changing the graph, if moving VertexData throws here, no graph state has changed yet
         Vertex v{std::move(vertexData), {}};
@@ -334,6 +346,14 @@ namespace simple_undirected_graph
             throw std::invalid_argument("vertex does not exist");
         }
         return (*vertexSlots_[id.index].vertex).data;
+    }
+
+    // if edge data type is no properties, this allows edgeAdd(u,v)
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool> Graph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v)
+        requires std::same_as<EdgeData, NoProperties>
+    {
+        return addEdge(u, v, NoProperties{});
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
