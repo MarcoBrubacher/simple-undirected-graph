@@ -654,13 +654,13 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::span<const typename Graph<VertexData, EdgeData, GraphData>::VertexId> Graph<VertexData, EdgeData, GraphData>::existingVertices() const
+    std::span<const typename Graph<VertexData, EdgeData, GraphData>::VertexId> Graph<VertexData, EdgeData, GraphData>::vertices() const
     {
         return liveVertices_;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::span<const typename Graph<VertexData, EdgeData, GraphData>::EdgeId> Graph<VertexData, EdgeData, GraphData>::existingEdges() const
+    std::span<const typename Graph<VertexData, EdgeData, GraphData>::EdgeId> Graph<VertexData, EdgeData, GraphData>::edges() const
     {
         return liveEdges_;
     }
