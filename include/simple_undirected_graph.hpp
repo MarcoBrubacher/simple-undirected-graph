@@ -182,12 +182,11 @@ namespace simple_undirected_graph
         std::size_t degree(VertexId id) const;
 
         /**
-         * returns read-only access to the vertex's adjacency list
-         * this reference becomes invalid if the vertex is removed and may become invalid if vertex storage moves
-         * keep the VertexId and call adjacency(id) again when accessing the adjacency list later
+         * returns read-only access to the vertex's adjacency entries
+         * the returned span is valid until the graph topology is modified
          * @throws std::invalid_argument if the vertex does not exist
          */
-        const std::vector<Adjacency> &adjacency(VertexId id) const;
+        std::span<const Adjacency> adjacency(VertexId id) const;
 
         /**
          * returns editable access to the vertex data
