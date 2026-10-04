@@ -22,7 +22,7 @@ The graph additionally keeps an `edgeLookup_` hash table. Its key is a normalize
 
 ### Complete nesting overview
 
-```text
+```text 
 Graph<VertexData, EdgeData, GraphData>
 |
 |-- graphId_
@@ -138,7 +138,7 @@ The lookup table allows the graph to check whether two vertices are connected an
 
 ## Iteration
 
-`existingVertices()` and `existingEdges()` return read-only views over the live-ID lists. This means iteration only visits elements that actually exist, while the slot lists remain responsible for storage and reuse, thus enabling fast iteration over the existing vertices and edges.
+`vertices()` and `edges()` return read-only views over the live-ID lists. This means iteration only visits elements that actually exist, while the slot lists remain responsible for storage and reuse, thus enabling fast iteration over the existing vertices and edges.
 
 ## Copy and move
 

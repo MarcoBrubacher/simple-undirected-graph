@@ -247,9 +247,9 @@ namespace simple_undirected_graph
         // iteration //
 
         // iterates over all existing vertices in the graph
-        std::span<const VertexId> existingVertices() const;
+        std::span<const VertexId> vertices() const;
         // iterates over all existing edges in the graph
-        std::span<const EdgeId> existingEdges() const;
+        std::span<const EdgeId> edges() const;
 
     private:
         // internal storage types //
