@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <functional>
 #include <concepts>
+#include <type_traits>
 
 namespace simple_undirected_graph
 {
@@ -141,7 +142,7 @@ namespace simple_undirected_graph
          * the source graph is left empty with a new graph identity
          * @param sourceGraph graph to move from
          */
-        Graph(Graph &&sourceGraph);
+        Graph(Graph &&sourceGraph) noexcept(std::is_nothrow_move_constructible_v<GraphData>);
 
         /**
          * replaces this graph by taking ownership of another graph's contents
@@ -150,7 +151,7 @@ namespace simple_undirected_graph
          * @param sourceGraph graph to move from
          * @return this graph
          */
-        Graph &operator=(Graph &&sourceGraph);
+        Graph &operator=(Graph &&sourceGraph) noexcept(std::is_nothrow_move_assignable_v<GraphData>);
 
         // returns editable access to the graph data
         [[nodiscard]] GraphData &graphData() noexcept;

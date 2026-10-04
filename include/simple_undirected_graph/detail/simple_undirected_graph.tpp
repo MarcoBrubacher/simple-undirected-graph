@@ -86,8 +86,6 @@ namespace simple_undirected_graph
             slot.edge->endpointV.graphId = graphId_;
         }
 
-        // go through every stored endpoint-pair -> EdgeId mapping, where entry.first is the EndpointPair and entry.second is the EdgeId
-        // the copied EdgeIds still contain the old graphId, so update each one to this graph's new graphId_
         for (typename std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher>::value_type &entry : edgeLookup_)
         {
             entry.second.graphId = graphId_;
@@ -110,29 +108,28 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::Graph(Graph &&sourceGraph) : graphId_(sourceGraph.graphId_),
-                                                                         graphData_(std::move(sourceGraph.graphData_)),
-                                                                         vertexSlots_(std::move(sourceGraph.vertexSlots_)),
-                                                                         edgeSlots_(std::move(sourceGraph.edgeSlots_)),
-                                                                         freeVertexSlots_(std::move(sourceGraph.freeVertexSlots_)),
-                                                                         freeEdgeSlots_(std::move(sourceGraph.freeEdgeSlots_)),
-                                                                         liveVertices_(std::move(sourceGraph.liveVertices_)),
-                                                                         liveEdges_(std::move(sourceGraph.liveEdges_)),
-                                                                         edgeLookup_(std::move(sourceGraph.edgeLookup_))
+    Graph<VertexData, EdgeData, GraphData>::Graph(Graph &&sourceGraph) noexcept(std::is_nothrow_move_constructible_v<GraphData>) : graphId_(sourceGraph.graphId_),
+                                                                                                                                   graphData_(std::move(sourceGraph.graphData_)),
+                                                                                                                                   vertexSlots_(std::move(sourceGraph.vertexSlots_)),
+                                                                                                                                   edgeSlots_(std::move(sourceGraph.edgeSlots_)),
+                                                                                                                                   freeVertexSlots_(std::move(sourceGraph.freeVertexSlots_)),
+                                                                                                                                   freeEdgeSlots_(std::move(sourceGraph.freeEdgeSlots_)),
+                                                                                                                                   liveVertices_(std::move(sourceGraph.liveVertices_)),
+                                                                                                                                   liveEdges_(std::move(sourceGraph.liveEdges_)),
+                                                                                                                                   edgeLookup_(std::move(sourceGraph.edgeLookup_))
     {
         // leave the moved-from graph empty and give it a fresh graph ID
         sourceGraph.clear();
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData> &Graph<VertexData, EdgeData, GraphData>::operator=(Graph &&sourceGraph)
+    Graph<VertexData, EdgeData, GraphData> &Graph<VertexData, EdgeData, GraphData>::operator=(Graph &&sourceGraph) noexcept(std::is_nothrow_move_assignable_v<GraphData>)
     {
         if (this == &sourceGraph)
         {
             return *this;
         }
 
-        // store the graph ID that will be transferred
         std::size_t sourceGraphId = sourceGraph.graphId_;
 
         // do potentially throwing work before changing graph identity
@@ -244,7 +241,7 @@ namespace simple_undirected_graph
         }
         catch (...)
         {
-            // undo all entries that were successfully completed
+            // undo all entries that were successfully completed to perserve the original graph state
             if (liveVertices_.size() > oldLiveVerticesSize)
             {
                 liveVertices_.pop_back();
@@ -260,7 +257,6 @@ namespace simple_undirected_graph
 
         // everything succeeded, so store the final live position and commit the slot reuse
         vertexSlots_[slotIndex].liveIndex = oldLiveVerticesSize;
-
         if (reusingSlot)
         {
             vertexSlots_[slotIndex].generation = generation;
@@ -278,7 +274,6 @@ namespace simple_undirected_graph
             return false;
         }
 
-        // The slot stores the Vertex inside std::optional, so dereference it to access its adjacency list.
         // removeEdge() removes the edge from both endpoints, so repeatedly removing adjacency.back() eventually isolates this vertex.
         while (!(*vertexSlots_[id.index].vertex).adjacency.empty())
         {
@@ -400,8 +395,6 @@ namespace simple_undirected_graph
         }
 
         EndpointPair endpoints = normalizeEndpoints(u, v);
-
-        // check whether the undirected edge already exists
         typename std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher>::iterator existingEdge = edgeLookup_.find(endpoints);
 
         if (existingEdge != edgeLookup_.end())
@@ -412,7 +405,6 @@ namespace simple_undirected_graph
         std::vector<Adjacency> &adjacencyU = (*vertexSlots_[u.index].vertex).adjacency;
         std::vector<Adjacency> &adjacencyV = (*vertexSlots_[v.index].vertex).adjacency;
 
-        // these are the positions where the new adjacency entries will be appended
         std::size_t adjacencyIndexU = adjacencyU.size();
         std::size_t adjacencyIndexV = adjacencyV.size();
 
@@ -538,7 +530,6 @@ namespace simple_undirected_graph
         }
         adjacencyU.pop_back();
 
-        // repeat procedure for endpointV
         if (adjacencyIndexV != adjacencyV.size() - 1)
         {
             EdgeId movedId = adjacencyV.back().edge;
@@ -615,7 +606,7 @@ namespace simple_undirected_graph
         typename std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher>::const_iterator entry = edgeLookup_.find(normalizeEndpoints(u, v));
         if (entry == edgeLookup_.end())
         {
-            return std::nullopt; // std::optional<EdgeId> has no value
+            return std::nullopt;
         }
         return (*entry).second;
     }
