@@ -31,6 +31,12 @@ Graph<VertexData, EdgeData, GraphData>
 |-- graphData_
 |   `-- GraphData
 |
+|-- VertexIdHash
+|   `-- hashes VertexId values for unordered containers
+|
+|-- EdgeIdHash
+|   `-- hashes EdgeId values for unordered containers
+|
 |-- vertexSlots_
 |   `-- std::vector<VertexSlot>
 |       `-- VertexSlot
@@ -117,6 +123,8 @@ The additional `edgeLookup_` provides a direct lookup from two endpoint vertices
 ## IDs and slot reuse
 
 A `VertexId` or `EdgeId` internally contains a graph ID, slot index and generation. These values are private and IDs are used as opaque handles by callers. The slot index tells the graph where the element is stored. The generation changes when a removed slot is reused, therefore an old ID does not accidentally become valid again just because the same slot index is used for a new element. The graph ID additionally prevents IDs from one graph instance from being used with another graph.
+
+`VertexIdHash` and `EdgeIdHash` provide hash functions for the opaque ID types, allowing vertex and edge IDs to be used as keys in user-owned unordered containers without exposing their private components.
 
 ## Adding and removing
 
