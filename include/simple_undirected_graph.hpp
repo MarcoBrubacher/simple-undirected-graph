@@ -38,6 +38,10 @@ namespace simple_undirected_graph
     public:
         // handle and adjacency types //
 
+        // forward declarations so VertexId and EdgeId can grant the hashers access to their private ID components
+        struct VertexIdHash;
+        struct EdgeIdHash;
+
         /**
          * identifies one vertex in one graph instance
          * an ID becomes invalid if it is used with another graph or its slot is reused
@@ -45,11 +49,14 @@ namespace simple_undirected_graph
         struct VertexId
         {
         public:
-            bool operator==(const VertexId &) const = default;
+            bool operator==(const VertexId &) const noexcept = default;
 
         private:
             // allows Graph to access ID internals while keeping them hidden from callers
             friend class Graph;
+
+            // allows VertexIdHash to hash the private ID components
+            friend struct VertexIdHash;
 
             VertexId(std::size_t graphId, std::size_t index, std::size_t generation);
 
@@ -65,17 +72,32 @@ namespace simple_undirected_graph
         struct EdgeId
         {
         public:
-            bool operator==(const EdgeId &) const = default;
+            bool operator==(const EdgeId &) const noexcept = default;
 
         private:
             // allows Graph to access ID internals while keeping them hidden from callers
             friend class Graph;
+
+            // allows EdgeIdHash to hash the private ID components
+            friend struct EdgeIdHash;
 
             EdgeId(std::size_t graphId, std::size_t index, std::size_t generation);
 
             std::size_t graphId;
             std::size_t index;
             std::size_t generation;
+        };
+
+        // allows VertexId to be used as a key in user-owned unordered containers without exposing its private internals
+        struct VertexIdHash
+        {
+            std::size_t operator()(const VertexId &id) const noexcept;
+        };
+
+        // allows EdgeId to be used as a key in user-owned unordered containers without exposing its private internals
+        struct EdgeIdHash
+        {
+            std::size_t operator()(const EdgeId &id) const noexcept;
         };
 
         /**
@@ -124,6 +146,7 @@ namespace simple_undirected_graph
         /**
          * replaces this graph by taking ownership of another graph's contents
          * existing IDs continue to belong to the moved graph
+         * the source graph is left empty with a new graph identity
          * @param sourceGraph graph to move from
          * @return this graph
          */
@@ -289,9 +312,12 @@ namespace simple_undirected_graph
 
         // iteration //
 
-        // iterates over all existing vertices in the graph
+        // returns read-only access to the existing vertex IDs
+        // the returned span is valid until the graph topology is modified
         [[nodiscard]] std::span<const VertexId> vertices() const noexcept;
-        // iterates over all existing edges in the graph
+
+        // returns read-only access to the existing edge IDs
+        // the returned span is valid until the graph topology is modified
         [[nodiscard]] std::span<const EdgeId> edges() const noexcept;
 
     private:
@@ -350,13 +376,7 @@ namespace simple_undirected_graph
         // custom hasher used by std::unordered_map for EndpointPair keys
         struct EndpointPairHasher
         {
-            std::size_t operator()(const EndpointPair &pair) const
-            {
-                std::size_t hashA = std::hash<std::size_t>{}(pair.first);
-                std::size_t hashB = std::hash<std::size_t>{}(pair.second);
-
-                return hashA ^ (hashB << 1);
-            }
+            std::size_t operator()(const EndpointPair &pair) const noexcept;
         };
 
         // graph storage //

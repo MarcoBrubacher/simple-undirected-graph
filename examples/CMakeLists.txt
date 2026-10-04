@@ -5,6 +5,7 @@ set(SIMPLE_UNDIRECTED_GRAPH_EXAMPLE_SOURCES
     edge_operations.cpp
     graph_properties.cpp
     iteration.cpp
+    id_hashing.cpp
 )
 
 foreach(EXAMPLE_SOURCE IN LISTS SIMPLE_UNDIRECTED_GRAPH_EXAMPLE_SOURCES)

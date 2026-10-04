@@ -14,6 +14,25 @@ namespace simple_undirected_graph
                                                                                                                              index(index),
                                                                                                                              generation(generation) {}
     template <typename VertexData, typename EdgeData, typename GraphData>
+    std::size_t Graph<VertexData, EdgeData, GraphData>::VertexIdHash::operator()(const VertexId &id) const noexcept
+    {
+        std::size_t graphHash = std::hash<std::size_t>{}(id.graphId);
+        std::size_t indexHash = std::hash<std::size_t>{}(id.index);
+        std::size_t generationHash = std::hash<std::size_t>{}(id.generation);
+
+        return graphHash ^ (indexHash << 1) ^ (generationHash << 2);
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::size_t Graph<VertexData, EdgeData, GraphData>::EdgeIdHash::operator()(const EdgeId &id) const noexcept
+    {
+        std::size_t graphHash = std::hash<std::size_t>{}(id.graphId);
+        std::size_t indexHash = std::hash<std::size_t>{}(id.index);
+        std::size_t generationHash = std::hash<std::size_t>{}(id.generation);
+
+        return graphHash ^ (indexHash << 1) ^ (generationHash << 2);
+    }
+    template <typename VertexData, typename EdgeData, typename GraphData>
     Graph<VertexData, EdgeData, GraphData>::Graph() : graphId_(nextGraphId_++) {}
 
     template <typename VertexData, typename EdgeData, typename GraphData>
@@ -659,5 +678,14 @@ namespace simple_undirected_graph
         }
 
         return {endpointIndexA, endpointIndexB};
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::size_t Graph<VertexData, EdgeData, GraphData>::EndpointPairHasher::operator()(const EndpointPair &pair) const noexcept
+    {
+        std::size_t hashA = std::hash<std::size_t>{}(pair.first);
+        std::size_t hashB = std::hash<std::size_t>{}(pair.second);
+
+        return hashA ^ (hashB << 1);
     }
 }
