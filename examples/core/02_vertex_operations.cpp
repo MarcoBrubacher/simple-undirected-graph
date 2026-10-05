@@ -7,7 +7,6 @@
 struct Protein
 {
     Protein(std::string name, int aminoAcidCount) : name(std::move(name)), aminoAcidCount(aminoAcidCount) {}
-
     std::string name;
     int aminoAcidCount;
 };
@@ -30,7 +29,6 @@ int main()
     // constructs the Protein directly inside the graph from its constructor arguments
     Graph::VertexId egfrId = graph.emplaceVertex("EGFR", 1210);
 
-    // prints the number of proteins currently represented by the graph
     std::cout << "Protein count: " << graph.vertexCount() << '\n';
 
     // reads the protein data through its vertex ID
@@ -48,11 +46,6 @@ int main()
     // removes the protein vertex and reports whether the removal succeeded
     bool removed = graph.removeVertex(mdm2Id);
     std::cout << "MDM2 removed: " << removed << '\n';
-
-    // the old ID no longer refers to an existing vertex
-    std::cout << "MDM2 exists after removal: " << graph.vertexExists(mdm2Id) << '\n';
-
-    std::cout << "Protein count after removal: " << graph.vertexCount() << '\n';
 
     // propertyless graphs can still add vertices without supplying data
     simple_undirected_graph::Graph<> propertylessGraph;
