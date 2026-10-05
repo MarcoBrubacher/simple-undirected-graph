@@ -7,7 +7,6 @@
 #include <utility>
 #include <span>
 #include <unordered_map>
-#include <functional>
 #include <concepts>
 #include <type_traits>
 
@@ -203,6 +202,7 @@ namespace simple_undirected_graph
 
         /**
          * returns read-only access to the vertex's adjacency entries
+         * adjacency order is unspecified and may change when the graph topology is modified
          * the returned span is valid until the graph topology is modified
          * @throws std::invalid_argument if the vertex does not exist
          */
@@ -309,10 +309,12 @@ namespace simple_undirected_graph
         // iteration //
 
         // returns read-only access to the existing vertex IDs
+        // iteration order is unspecified and may change when the graph topology is modified
         // the returned span is valid until the graph topology is modified
         [[nodiscard]] std::span<const VertexId> vertices() const noexcept;
 
         // returns read-only access to the existing edge IDs
+        // iteration order is unspecified and may change when the graph topology is modified
         // the returned span is valid until the graph topology is modified
         [[nodiscard]] std::span<const EdgeId> edges() const noexcept;
 
