@@ -38,15 +38,11 @@ The library represents finite simple undirected graphs:
 
 The graph uses reusable storage slots, generation-safe IDs, compact live-ID lists, adjacency-position bookkeeping, and an endpoint-pair hash table.
 
-For a detailed description of the internal representation, see [DESIGN.md](DESIGN.md).
+For a detailed description of the internal representation, see [DESIGN.md](include/simple_undirected_graph/DESIGN.md).
 
 ## Goal
 
 The goal is to provide a small and reusable graph container without depending on a large graph framework.
-
-## Roadmap
-
-The library is still under active development. The current focus is on finishing and validating the core graph implementation before adding larger extensions.
 
 ### Planned
 

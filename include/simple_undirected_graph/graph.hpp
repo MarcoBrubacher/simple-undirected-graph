@@ -174,11 +174,27 @@ namespace simple_undirected_graph
             requires std::same_as<VertexData, NoProperties>;
 
         /**
-         * creates a vertex with the supplied vertex data
-         * @param vertexData data stored with the vertex
+         * creates a vertex by copying the supplied vertex data
+         * @param vertexData data copied into the vertex
          * @return ID of the new vertex
          */
-        VertexId addVertex(VertexData vertexData);
+        VertexId addVertex(const VertexData &vertexData);
+
+        /**
+         * creates a vertex by moving the supplied vertex data
+         * @param vertexData data moved into the vertex
+         * @return ID of the new vertex
+         */
+        VertexId addVertex(VertexData &&vertexData);
+
+        /**
+         * creates a vertex by constructing its data directly from the supplied arguments
+         * @param args arguments forwarded to the VertexData constructor
+         * @return ID of the new vertex
+         */
+        template <typename... Args>
+            requires std::constructible_from<VertexData, Args...>
+        VertexId emplaceVertex(Args &&...args);
 
         /**
          * IDs of other existing vertices remain unchanged
@@ -257,6 +273,19 @@ namespace simple_undirected_graph
         std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v, EdgeData &&edgeData);
 
         /**
+         * creates an edge by constructing its data directly from the supplied arguments
+         * existing edge data is left unchanged if the edge already exists
+         * @param u first endpoint
+         * @param v second endpoint
+         * @param args arguments forwarded to the EdgeData constructor
+         * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
+         * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
+         */
+        template <typename... Args>
+            requires std::constructible_from<EdgeData, Args...>
+        std::pair<EdgeId, bool> emplaceEdge(VertexId u, VertexId v, Args &&...args);
+
+        /**
          * removed storage may be reused with a new generation (IDs of other existing edges remain unchanged)
          * @return true if the edge existed and was removed, false otherwise
          */
@@ -319,15 +348,25 @@ namespace simple_undirected_graph
         [[nodiscard]] std::span<const EdgeId> edges() const noexcept;
 
     private:
-        // shared insertion logic for the EdgeData overloads. forwarding preserves whether the data should be copied or moved until insertion is confirmed
-        template <typename T>
-        std::pair<EdgeId, bool> insertEdge(VertexId u, VertexId v, T &&edgeData);
+        // shared insertion logic for addVertex() and emplaceVertex()
+        template <typename... Args>
+            requires std::constructible_from<VertexData, Args...>
+        VertexId insertVertex(Args &&...args);
+
+        // shared insertion logic for addEdge() and emplaceEdge()
+        template <typename... Args>
+            requires std::constructible_from<EdgeData, Args...>
+        std::pair<EdgeId, bool> insertEdge(VertexId u, VertexId v, Args &&...args);
 
         /**
          * vertex stored inside a vertex slot, which owns its data and adjacency list
          */
         struct Vertex
         {
+            template <typename... Args>
+                requires std::constructible_from<VertexData, Args...>
+            explicit Vertex(std::in_place_t, Args &&...args);
+
             VertexData data;
             std::vector<Adjacency> adjacency;
         };
@@ -348,6 +387,9 @@ namespace simple_undirected_graph
          */
         struct Edge
         {
+            template <typename... Args>
+                requires std::constructible_from<EdgeData, Args...>
+            Edge(VertexId u, VertexId v, std::size_t adjacencyIndexU, std::size_t adjacencyIndexV, std::in_place_t, Args &&...args);
             VertexId endpointU;
             VertexId endpointV;
             EdgeData data;
@@ -378,8 +420,6 @@ namespace simple_undirected_graph
             std::size_t operator()(const EndpointPair &pair) const noexcept;
         };
 
-        // graph storage //
-
         // provides and ensures unique IDs for graph instances
         inline static std::atomic<std::size_t> nextGraphId_ = 0;
 
@@ -399,4 +439,4 @@ namespace simple_undirected_graph
         std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher> edgeLookup_;
     };
 }
-#include <simple_undirected_graph/detail/simple_undirected_graph.tpp>
+#include <simple_undirected_graph/detail/graph.tpp>
