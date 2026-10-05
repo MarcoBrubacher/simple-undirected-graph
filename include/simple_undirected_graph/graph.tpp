@@ -54,8 +54,7 @@ namespace simple_undirected_graph
                                                                               liveEdges_(sourceGraph.liveEdges_),
                                                                               edgeLookup_(sourceGraph.edgeLookup_)
     {
-        // the graph was copied with a new graph ID, but all IDs inside the copied storage still contain the source graph ID
-        // therefore every stored VertexId and EdgeId must be updated to belong to this graph
+        // every stored VertexId and EdgeId must be updated to belong to this graph
 
         for (VertexId &id : liveVertices_)
         {
@@ -105,7 +104,7 @@ namespace simple_undirected_graph
             return *this;
         }
 
-        // use the copy constructor so the copied graph gets a new graph ID and all IDs inside the copied storage are updated correctly
+        // use the copy constructor so the copied graph gets a new graph ID and all IDs inside the copied storage are updated
         Graph copiedGraph(sourceGraph);
 
         *this = std::move(copiedGraph);
@@ -396,7 +395,7 @@ namespace simple_undirected_graph
         std::size_t lastLiveIndex = liveEdges_.size() - 1;
 
         // remove this EdgeId from liveEdges_ without shifting all later ID, if it is not already last, move the last EdgeId into its place
-        // then update that moved edge's liveIndex so it still points to the correct position
+        // afterwards update that moved edge's liveIndex so it still points to the correct position
         if (liveIndex != lastLiveIndex)
         {
             EdgeId movedId = liveEdges_.back();
@@ -628,7 +627,7 @@ namespace simple_undirected_graph
 
         EdgeId id{graphId_, slotIndex, generation};
 
-        // remember where the new EdgeId will be appended so partial changes can be undone and liveIndex can later be set directly
+        // store the new EdgeId locatio, so that partial changes can be undone and liveIndex can later be set directly
         std::size_t oldLiveEdgesSize = liveEdges_.size();
 
         try
