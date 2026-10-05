@@ -31,9 +31,6 @@ namespace simple_undirected_graph
     class Graph
     {
     public:
-        // handle and adjacency types //
-
-        // forward declarations so VertexId and EdgeId can grant the hashers access to their private ID components
         struct VertexIdHash;
         struct EdgeIdHash;
 
@@ -52,8 +49,11 @@ namespace simple_undirected_graph
 
             VertexId(std::size_t graphId, std::size_t index, std::size_t generation);
 
+            // is the ID of the graph this vertex belongs to and must match graphId_
             std::size_t graphId;
+            // is the index of this vertex in vertexSlots_
             std::size_t index;
+            // is the generation number of vertexSlots_[index] when this ID was created
             std::size_t generation;
         };
 
@@ -72,33 +72,35 @@ namespace simple_undirected_graph
 
             EdgeId(std::size_t graphId, std::size_t index, std::size_t generation);
 
+            // is the ID of the graph this vertex belongs to, must match graphId_
             std::size_t graphId;
+            // is the index of this edge in edgeSlots_
             std::size_t index;
+            // is the generation number of edgeSlots_[index] when this ID was created
             std::size_t generation;
         };
 
-        // allows VertexId to be used as a key in user-owned unordered containers without exposing its private internals
+        // allows vertex and edge IDs to be used as keys in hash-based containers (buckets)
         struct VertexIdHash
         {
             std::size_t operator()(const VertexId &id) const noexcept;
         };
-
-        // allows EdgeId to be used as a key in user-owned unordered containers without exposing its private internals
         struct EdgeIdHash
         {
             std::size_t operator()(const EdgeId &id) const noexcept;
         };
 
         /**
-         * one entry in a vertex's adjacency list; stores the neighboring vertex and the connecting edge
+         * one entry in a vertex's adjacency list
          */
         struct Adjacency
         {
+            // neighbor of the vertex that owns this adjacency entry
             VertexId neighbor;
+
+            // edge between the vertex that owns this adjacency entry and the neighbor
             EdgeId edge;
         };
-
-        // construction and graph data //
 
         // creates an empty graph with default-initialized graph data
         Graph();
@@ -331,29 +333,31 @@ namespace simple_undirected_graph
 
         // iteration //
 
-        // returns read-only access to the existing vertex IDs
-        // iteration order is unspecified and may change when the graph topology is modified
-        // the returned span is valid until the graph topology is modified
+        /**
+         * returns read-only access to the existing vertex IDs
+         * iteration order is unspecified and may change when the graph topology is modified
+         * the returned span is valid until the graph topology is modified
+         */
         [[nodiscard]] std::span<const VertexId> vertices() const noexcept;
 
-        // returns read-only access to the existing edge IDs
-        // iteration order is unspecified and may change when the graph topology is modified
-        // the returned span is valid until the graph topology is modified
+        /**
+         * returns read-only access to the existing edge IDs
+         * iteration order is unspecified and may change when the graph topology is modified
+         * the returned span is valid until the graph topology is modified
+         */
         [[nodiscard]] std::span<const EdgeId> edges() const noexcept;
 
     private:
-        // shared insertion logic for addVertex() and emplaceVertex()
         template <typename... Args>
             requires std::constructible_from<VertexData, Args...>
         VertexId insertVertex(Args &&...args);
 
-        // shared insertion logic for addEdge() and emplaceEdge()
         template <typename... Args>
             requires std::constructible_from<EdgeData, Args...>
         std::pair<EdgeId, bool> insertEdge(VertexId u, VertexId v, Args &&...args);
 
         /**
-         * vertex stored inside a vertex slot, which owns its data and adjacency list
+         * vertex stored inside a vertex slot
          */
         struct Vertex
         {
@@ -362,22 +366,25 @@ namespace simple_undirected_graph
             explicit Vertex(std::in_place_t, Args &&...args);
 
             VertexData data;
+
+            // stores the neighboring vertices and their connecting edge IDs
             std::vector<Adjacency> adjacency;
         };
 
         /**
          * storage for one vertex that can be reused after removal (if the slot is unused the vertex is empty)
-         * generation is increased when a new vertex reuses this slot
+         * generation is increased when a new vertex reuses this slot!
          */
         struct VertexSlot
         {
             std::optional<Vertex> vertex;
             std::size_t generation = 0;
+            // is the index of this vertex in liveVertices_
             std::size_t liveIndex = 0;
         };
 
         /**
-         * undirected edge stored inside an edge slot, which owns its data and stores both endpoints (endpoint order does not imply direction)
+         * undirected edge stored inside an edge slot
          */
         struct Edge
         {
@@ -387,21 +394,26 @@ namespace simple_undirected_graph
 
             EdgeData data;
 
+            // endpointU.index indexes vertexSlots_
             VertexId endpointU;
+            // endpointV.index indexes vertexSlots_
             VertexId endpointV;
 
+            // is the index of this edge in the adjacency vector of vertex U
             std::size_t adjacencyIndexU;
+            // is the index of this edge in the adjacency vector of vertex V
             std::size_t adjacencyIndexV;
         };
 
         /**
          * storage for one edge that can be reused after removal (if the slot is unused the edge is empty)
-         * generation is increased when a new edge reuses this slot
+         * generation is increased when a new edge reuses this slot!
          */
         struct EdgeSlot
         {
             std::optional<Edge> edge;
             std::size_t generation = 0;
+            // is the index of this edge in liveEdges_
             std::size_t liveIndex = 0;
         };
 
@@ -409,7 +421,7 @@ namespace simple_undirected_graph
         using EndpointPair = std::pair<std::size_t, std::size_t>;
         EndpointPair normalizeEndpoints(VertexId u, VertexId v) const noexcept;
 
-        // incremental hash combiner for composite keys, folds each component into a running hash seed
+        // combines the endpoint indices into one hash
         static std::size_t combineHash(std::size_t seed, std::size_t value) noexcept;
         struct EndpointPairHasher
         {
@@ -421,16 +433,20 @@ namespace simple_undirected_graph
         std::size_t graphId_;
         GraphData graphData_{};
 
+        // Indexed by vertexId.index
         std::vector<VertexSlot> vertexSlots_;
+        // Indexed by edgeId.index
         std::vector<EdgeSlot> edgeSlots_;
 
         std::vector<std::size_t> freeVertexSlots_;
         std::vector<std::size_t> freeEdgeSlots_;
 
+        // Indexed by vertexSlot.liveIndex
         std::vector<VertexId> liveVertices_;
+        // Indexed by edgeSlot.liveIndex
         std::vector<EdgeId> liveEdges_;
 
-        // maps a normalized pair (since undirected graph) of endpoint slot indices directly to the corresponding EdgeId for an average edge lookup of O(1)
+        // finds an edge by its two endpoint indices, regardless of order
         std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher> edgeLookup_;
     };
 }
