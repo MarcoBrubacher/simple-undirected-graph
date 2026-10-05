@@ -1,4 +1,4 @@
-#include <simple_undirected_graph.hpp>
+#include <simple_undirected_graph/graph.hpp>
 
 #include <string>
 #include <vector>

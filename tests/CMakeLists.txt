@@ -1,19 +1,19 @@
 set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
-    test_construction.cpp
-    test_vertices.cpp
-    test_edges.cpp
-    test_adjacency.cpp
-    test_edge_lookup.cpp
-    test_removal.cpp
-    test_slot_reuse.cpp
-    test_invalid_ids.cpp
-    test_iteration.cpp
-    test_clear.cpp
-    test_copy.cpp
-    test_move.cpp
-    test_properties.cpp
-    test_invariants.cpp
-    
+    core/test_construction.cpp
+    core/test_vertices.cpp
+    core/test_edges.cpp
+    core/test_adjacency.cpp
+    core/test_edge_lookup.cpp
+    core/test_removal.cpp
+    core/test_slot_reuse.cpp
+    core/test_invalid_ids.cpp
+    core/test_iteration.cpp
+    core/test_clear.cpp
+    core/test_copy.cpp
+    core/test_move.cpp
+    core/test_properties.cpp
+    core/test_invariants.cpp
+    core/test_exception_safety.cpp
 )
 
 add_executable(
