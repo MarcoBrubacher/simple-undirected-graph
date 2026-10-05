@@ -206,11 +206,8 @@ namespace simple_undirected_graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     typename Graph<VertexData, EdgeData, GraphData>::VertexId Graph<VertexData, EdgeData, GraphData>::addVertex(VertexData vertexData)
     {
-        // construct the vertex before changing the graph, if moving VertexData throws here, no graph state has changed yet
-        Vertex v{std::move(vertexData), {}};
-
         // determine which vertex slot will be used, but do not commit reuse yet
-        bool reusingSlot = !freeVertexSlots_.empty();
+        const bool reusingSlot = !freeVertexSlots_.empty();
 
         std::size_t slotIndex;
         std::size_t generation;
@@ -218,13 +215,11 @@ namespace simple_undirected_graph
         if (reusingSlot)
         {
             slotIndex = freeVertexSlots_.back();
-
             // a slot was reused, thus the generation of the VertexSlot must increase (but first check for overflow)
             if (vertexSlots_[slotIndex].generation == std::numeric_limits<std::size_t>::max())
             {
                 throw std::overflow_error("vertex generation exhausted");
             }
-
             generation = vertexSlots_[slotIndex].generation + 1;
         }
         else
@@ -237,11 +232,11 @@ namespace simple_undirected_graph
         VertexId id{graphId_, slotIndex, generation};
 
         // remember where the new VertexId will be appended so partial changes can be undone and liveIndex can later be set directly
-        std::size_t oldLiveVerticesSize = liveVertices_.size();
+        const std::size_t oldLiveVerticesSize = liveVertices_.size();
 
         try
         {
-            vertexSlots_[slotIndex].vertex = std::move(v);
+            vertexSlots_[slotIndex].vertex.emplace(std::move(vertexData));
             liveVertices_.push_back(id);
         }
         catch (...)
