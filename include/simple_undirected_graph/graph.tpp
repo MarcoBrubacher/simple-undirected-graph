@@ -38,21 +38,31 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::Graph() : graphId_(nextGraphId_++) {}
+    Graph<VertexData, EdgeData, GraphData>::Graph()
+        requires std::default_initializable<GraphData>
+        : graphId_(nextGraphId_++)
+    {
+    }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::Graph(GraphData graphData) : graphId_(nextGraphId_++), graphData_(std::move(graphData)) {}
+    Graph<VertexData, EdgeData, GraphData>::Graph(GraphData graphData)
+        requires std::constructible_from<GraphData, GraphData &&>
+        : graphId_(nextGraphId_++), graphData_(std::move(graphData))
+    {
+    }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::Graph(const Graph &sourceGraph) : graphId_(nextGraphId_++),
-                                                                              graphData_(sourceGraph.graphData_),
-                                                                              vertexSlots_(sourceGraph.vertexSlots_),
-                                                                              edgeSlots_(sourceGraph.edgeSlots_),
-                                                                              freeVertexSlots_(sourceGraph.freeVertexSlots_),
-                                                                              freeEdgeSlots_(sourceGraph.freeEdgeSlots_),
-                                                                              liveVertices_(sourceGraph.liveVertices_),
-                                                                              liveEdges_(sourceGraph.liveEdges_),
-                                                                              edgeLookup_(sourceGraph.edgeLookup_)
+    Graph<VertexData, EdgeData, GraphData>::Graph(const Graph &sourceGraph)
+        requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &>
+        : graphId_(nextGraphId_++),
+          graphData_(sourceGraph.graphData_),
+          vertexSlots_(sourceGraph.vertexSlots_),
+          edgeSlots_(sourceGraph.edgeSlots_),
+          freeVertexSlots_(sourceGraph.freeVertexSlots_),
+          freeEdgeSlots_(sourceGraph.freeEdgeSlots_),
+          liveVertices_(sourceGraph.liveVertices_),
+          liveEdges_(sourceGraph.liveEdges_),
+          edgeLookup_(sourceGraph.edgeLookup_)
     {
         // every stored VertexId and EdgeId must be updated to belong to this graph
 

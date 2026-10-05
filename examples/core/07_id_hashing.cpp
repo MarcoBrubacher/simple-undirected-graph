@@ -41,7 +41,7 @@ int main()
     std::cout << "Paris visited: " << visited.contains(paris) << '\n';
     std::cout << "Berlin visited: " << visited.contains(berlin) << '\n';
 
-    // EdgeIdHash provides the same support for edge IDs
+    // EdgeIdHash provides the same for edge IDs
     std::unordered_map<Graph::EdgeId, std::string, Graph::EdgeIdHash> roadNames;
 
     roadNames.emplace(londonParis.first, "London-Paris");

@@ -102,21 +102,24 @@ namespace simple_undirected_graph
             EdgeId edge;
         };
 
-        // creates an empty graph with default-initialized graph data
-        Graph();
+        // creates empty graph with default-initialized graph data
+        Graph()
+            requires std::default_initializable<GraphData>;
 
         /**
          * creates an empty graph with the supplied graph data
          * @param graphData data stored with the graph
          */
-        explicit Graph(GraphData graphData);
+        explicit Graph(GraphData graphData)
+            requires std::constructible_from<GraphData, GraphData &&>;
 
         /**
          * creates a new graph by copying another graph
          * IDs from the source graph are not valid in the copy
          * @param sourceGraph graph to copy
          */
-        Graph(const Graph &sourceGraph);
+        Graph(const Graph &sourceGraph)
+            requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &>;
 
         /**
          * replaces this graph with a copy of another graph
