@@ -47,10 +47,7 @@ namespace simple_undirected_graph
             bool operator==(const VertexId &) const noexcept = default;
 
         private:
-            // allows Graph to access ID internals while keeping them hidden from callers
             friend class Graph;
-
-            // allows VertexIdHash to hash the private ID components
             friend struct VertexIdHash;
 
             VertexId(std::size_t graphId, std::size_t index, std::size_t generation);
@@ -70,10 +67,7 @@ namespace simple_undirected_graph
             bool operator==(const EdgeId &) const noexcept = default;
 
         private:
-            // allows Graph to access ID internals while keeping them hidden from callers
             friend class Graph;
-
-            // allows EdgeIdHash to hash the private ID components
             friend struct EdgeIdHash;
 
             EdgeId(std::size_t graphId, std::size_t index, std::size_t generation);
@@ -390,9 +384,11 @@ namespace simple_undirected_graph
             template <typename... Args>
                 requires std::constructible_from<EdgeData, Args...>
             Edge(VertexId u, VertexId v, std::size_t adjacencyIndexU, std::size_t adjacencyIndexV, std::in_place_t, Args &&...args);
+
+            EdgeData data;
+
             VertexId endpointU;
             VertexId endpointV;
-            EdgeData data;
 
             std::size_t adjacencyIndexU;
             std::size_t adjacencyIndexV;
@@ -420,7 +416,6 @@ namespace simple_undirected_graph
             std::size_t operator()(const EndpointPair &pair) const noexcept;
         };
 
-        // provides and ensures unique IDs for graph instances
         inline static std::atomic<std::size_t> nextGraphId_ = 0;
 
         std::size_t graphId_;
