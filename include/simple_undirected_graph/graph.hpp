@@ -7,25 +7,21 @@
 #include <utility>
 #include <span>
 #include <unordered_map>
-#include <functional>
+#include <concepts>
+#include <type_traits>
 
 namespace simple_undirected_graph
 {
     /**
      * empty property type used when no data is attached
-     * Graph<> uses NoProperties for vertex, edge, and graph data
      */
     struct NoProperties
     {
     };
 
     /**
-     * finite simple undirected graph with typed vertex, edge, and graph data, where
+     * finite simple undirected graph with typed vertex, edge, and graph data
      * vertices and edges may carry user-defined data, while graph-level data is stored once for the whole graph
-     *
-     * vertex and edge IDs belong to one graph instance and are generation-safe
-     * removed storage may be reused without making stale IDs valid again
-     * topology is modified only through the graph API
      *
      * @tparam VertexData type stored with each vertex
      * @tparam EdgeData type stored with each edge
@@ -37,17 +33,31 @@ namespace simple_undirected_graph
     public:
         // handle and adjacency types //
 
+        // forward declarations so VertexId and EdgeId can grant the hashers access to their private ID components
+        struct VertexIdHash;
+        struct EdgeIdHash;
+
         /**
          * identifies one vertex in one graph instance
          * an ID becomes invalid if it is used with another graph or its slot is reused
          */
         struct VertexId
         {
+        public:
+            bool operator==(const VertexId &) const noexcept = default;
+
+        private:
+            // allows Graph to access ID internals while keeping them hidden from callers
+            friend class Graph;
+
+            // allows VertexIdHash to hash the private ID components
+            friend struct VertexIdHash;
+
+            VertexId(std::size_t graphId, std::size_t index, std::size_t generation);
+
             std::size_t graphId;
             std::size_t index;
             std::size_t generation;
-
-            bool operator==(const VertexId &) const = default;
         };
 
         /**
@@ -56,11 +66,33 @@ namespace simple_undirected_graph
          */
         struct EdgeId
         {
+        public:
+            bool operator==(const EdgeId &) const noexcept = default;
+
+        private:
+            // allows Graph to access ID internals while keeping them hidden from callers
+            friend class Graph;
+
+            // allows EdgeIdHash to hash the private ID components
+            friend struct EdgeIdHash;
+
+            EdgeId(std::size_t graphId, std::size_t index, std::size_t generation);
+
             std::size_t graphId;
             std::size_t index;
             std::size_t generation;
+        };
 
-            bool operator==(const EdgeId &) const = default;
+        // allows VertexId to be used as a key in user-owned unordered containers without exposing its private internals
+        struct VertexIdHash
+        {
+            std::size_t operator()(const VertexId &id) const noexcept;
+        };
+
+        // allows EdgeId to be used as a key in user-owned unordered containers without exposing its private internals
+        struct EdgeIdHash
+        {
+            std::size_t operator()(const EdgeId &id) const noexcept;
         };
 
         /**
@@ -101,41 +133,68 @@ namespace simple_undirected_graph
         /**
          * creates a graph by taking ownership of another graph's contents
          * existing IDs continue to belong to the moved graph
+         * the source graph is left empty with a new graph identity
          * @param sourceGraph graph to move from
          */
-        Graph(Graph &&sourceGraph);
+        Graph(Graph &&sourceGraph) noexcept(std::is_nothrow_move_constructible_v<GraphData>);
 
         /**
          * replaces this graph by taking ownership of another graph's contents
          * existing IDs continue to belong to the moved graph
+         * the source graph is left empty with a new graph identity
          * @param sourceGraph graph to move from
          * @return this graph
          */
-        Graph &operator=(Graph &&sourceGraph);
+        Graph &operator=(Graph &&sourceGraph) noexcept(std::is_nothrow_move_assignable_v<GraphData>);
 
         // returns editable access to the graph data
-        GraphData &graphData();
+        [[nodiscard]] GraphData &graphData() noexcept;
 
         // returns read-only access to the graph data
-        const GraphData &graphData() const;
+        [[nodiscard]] const GraphData &graphData() const noexcept;
 
         /**
          * removes all vertices and edges (all previously issued vertex and edge IDs become invalid)
          */
-        void clear();
+        void clear() noexcept;
 
         /**
          * checks whether the graph has no vertices
          * @return true if the graph is empty, false otherwise
          */
-        bool empty() const;
+        [[nodiscard]] bool empty() const noexcept;
 
         // vertex operations //
 
         /**
+         * creates a vertex without properties
          * @return ID of the new vertex
          */
-        VertexId addVertex(VertexData vertexData);
+        VertexId addVertex()
+            requires std::same_as<VertexData, NoProperties>;
+
+        /**
+         * creates a vertex by copying the supplied vertex data
+         * @param vertexData data copied into the vertex
+         * @return ID of the new vertex
+         */
+        VertexId addVertex(const VertexData &vertexData);
+
+        /**
+         * creates a vertex by moving the supplied vertex data
+         * @param vertexData data moved into the vertex
+         * @return ID of the new vertex
+         */
+        VertexId addVertex(VertexData &&vertexData);
+
+        /**
+         * creates a vertex by constructing its data directly from the supplied arguments
+         * @param args arguments forwarded to the VertexData constructor
+         * @return ID of the new vertex
+         */
+        template <typename... Args>
+            requires std::constructible_from<VertexData, Args...>
+        VertexId emplaceVertex(Args &&...args);
 
         /**
          * IDs of other existing vertices remain unchanged
@@ -143,27 +202,27 @@ namespace simple_undirected_graph
          */
         bool removeVertex(VertexId id);
 
-        std::size_t vertexCount() const;
+        [[nodiscard]] std::size_t vertexCount() const noexcept;
 
         /**
          * checks whether the ID refers to a currently existing vertex in this graph
          * @return false for another graph, out-of-range index, unused slot, or stale generation
          */
-        bool vertexExists(VertexId id) const;
+        [[nodiscard]] bool vertexExists(VertexId id) const noexcept;
 
         /**
          * returns the number of neighbours of a vertex (which equals the numbers of incident edges)
          * @throws std::invalid_argument if the vertex does not exist
          */
-        std::size_t degree(VertexId id) const;
+        [[nodiscard]] std::size_t degree(VertexId id) const;
 
         /**
-         * returns read-only access to the vertex's adjacency list
-         * this reference becomes invalid if the vertex is removed and may become invalid if vertex storage moves
-         * keep the VertexId and call adjacency(id) again when accessing the adjacency list later
+         * returns read-only access to the vertex's adjacency entries
+         * adjacency order is unspecified and may change when the graph topology is modified
+         * the returned span is valid until the graph topology is modified
          * @throws std::invalid_argument if the vertex does not exist
          */
-        const std::vector<Adjacency> &adjacency(VertexId id) const;
+        [[nodiscard]] std::span<const Adjacency> adjacency(VertexId id) const;
 
         /**
          * returns editable access to the vertex data
@@ -171,7 +230,7 @@ namespace simple_undirected_graph
          * keep the VertexId and call vertexData(id) again when accessing the vertex later
          * @throws std::invalid_argument if the vertex does not exist
          */
-        VertexData &vertexData(VertexId id);
+        [[nodiscard]] VertexData &vertexData(VertexId id);
 
         /**
          * returns read-only access to the vertex data
@@ -179,16 +238,52 @@ namespace simple_undirected_graph
          * keep the VertexId and call vertexData(id) again when accessing the vertex later
          * @throws std::invalid_argument if the vertex does not exist
          */
-        const VertexData &vertexData(VertexId id) const;
+        [[nodiscard]] const VertexData &vertexData(VertexId id) const;
 
         // edge operations //
 
         /**
-         * existing edge data is left unchanged if the edge already exists
+         * creates an edge without properties
          * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
          * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
          */
-        std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v, EdgeData edgeData);
+        std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v)
+            requires std::same_as<EdgeData, NoProperties>;
+
+        /**
+         * creates an edge with the supplied edge data
+         * existing edge data is left unchanged if the edge already exists
+         * @param u first endpoint
+         * @param v second endpoint
+         * @param edgeData data stored with the edge
+         * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
+         * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
+         */
+        std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v, const EdgeData &edgeData);
+
+        /**
+         * creates an edge with the supplied edge data
+         * existing edge data is left unchanged if the edge already exists
+         * @param u first endpoint
+         * @param v second endpoint
+         * @param edgeData data moved into the edge
+         * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
+         * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
+         */
+        std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v, EdgeData &&edgeData);
+
+        /**
+         * creates an edge by constructing its data directly from the supplied arguments
+         * existing edge data is left unchanged if the edge already exists
+         * @param u first endpoint
+         * @param v second endpoint
+         * @param args arguments forwarded to the EdgeData constructor
+         * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
+         * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
+         */
+        template <typename... Args>
+            requires std::constructible_from<EdgeData, Args...>
+        std::pair<EdgeId, bool> emplaceEdge(VertexId u, VertexId v, Args &&...args);
 
         /**
          * removed storage may be reused with a new generation (IDs of other existing edges remain unchanged)
@@ -196,27 +291,27 @@ namespace simple_undirected_graph
          */
         bool removeEdge(EdgeId id);
 
-        std::size_t edgeCount() const;
+        [[nodiscard]] std::size_t edgeCount() const noexcept;
 
         /**
          * checks whether the ID refers to a currently existing edge in this graph
          * @return false for another graph, out-of-range index, unused slot, or stale generation
          */
-        bool edgeExists(EdgeId id) const;
+        [[nodiscard]] bool edgeExists(EdgeId id) const noexcept;
 
         /**
          * checks whether an edge exists between two vertices
          * @return true if an edge connects the vertices, false otherwise
          * @throws std::invalid_argument if a vertex does not exist
          */
-        bool hasEdge(VertexId u, VertexId v) const;
+        [[nodiscard]] bool hasEdge(VertexId u, VertexId v) const;
 
         /**
          * finds the ID of the edge connecting two vertices
          * @return edge ID if an edge exists
          * @throws std::invalid_argument if a vertex does not exist
          */
-        std::optional<EdgeId> findEdgeId(VertexId u, VertexId v) const;
+        [[nodiscard]] std::optional<EdgeId> findEdgeId(VertexId u, VertexId v) const;
 
         /**
          * returns editable access to the edge data
@@ -224,7 +319,7 @@ namespace simple_undirected_graph
          * keep the EdgeId and call edgeData(id) again when accessing the edge later
          * @throws std::invalid_argument if the edge does not exist
          */
-        EdgeData &edgeData(EdgeId id);
+        [[nodiscard]] EdgeData &edgeData(EdgeId id);
 
         /**
          * returns read-only access to the edge data
@@ -232,33 +327,46 @@ namespace simple_undirected_graph
          * keep the EdgeId and call edgeData(id) again when accessing the edge later
          * @throws std::invalid_argument if the edge does not exist
          */
-        const EdgeData &edgeData(EdgeId id) const;
+        [[nodiscard]] const EdgeData &edgeData(EdgeId id) const;
 
         /**
+         * returns both endpoints of an edge, since endpoint order has no directional meaning
          * @throws std::invalid_argument if the edge does not exist
          */
-        VertexId endpointU(EdgeId id) const;
-
-        /**
-         * @throws std::invalid_argument if the edge does not exist
-         */
-        VertexId endpointV(EdgeId id) const;
+        [[nodiscard]] std::pair<VertexId, VertexId> endpoints(EdgeId id) const;
 
         // iteration //
 
-        // iterates over all existing vertices in the graph
-        std::span<const VertexId> existingVertices() const;
-        // iterates over all existing edges in the graph
-        std::span<const EdgeId> existingEdges() const;
+        // returns read-only access to the existing vertex IDs
+        // iteration order is unspecified and may change when the graph topology is modified
+        // the returned span is valid until the graph topology is modified
+        [[nodiscard]] std::span<const VertexId> vertices() const noexcept;
+
+        // returns read-only access to the existing edge IDs
+        // iteration order is unspecified and may change when the graph topology is modified
+        // the returned span is valid until the graph topology is modified
+        [[nodiscard]] std::span<const EdgeId> edges() const noexcept;
 
     private:
-        // internal storage types //
+        // shared insertion logic for addVertex() and emplaceVertex()
+        template <typename... Args>
+            requires std::constructible_from<VertexData, Args...>
+        VertexId insertVertex(Args &&...args);
+
+        // shared insertion logic for addEdge() and emplaceEdge()
+        template <typename... Args>
+            requires std::constructible_from<EdgeData, Args...>
+        std::pair<EdgeId, bool> insertEdge(VertexId u, VertexId v, Args &&...args);
 
         /**
          * vertex stored inside a vertex slot, which owns its data and adjacency list
          */
         struct Vertex
         {
+            template <typename... Args>
+                requires std::constructible_from<VertexData, Args...>
+            explicit Vertex(std::in_place_t, Args &&...args);
+
             VertexData data;
             std::vector<Adjacency> adjacency;
         };
@@ -279,6 +387,9 @@ namespace simple_undirected_graph
          */
         struct Edge
         {
+            template <typename... Args>
+                requires std::constructible_from<EdgeData, Args...>
+            Edge(VertexId u, VertexId v, std::size_t adjacencyIndexU, std::size_t adjacencyIndexV, std::in_place_t, Args &&...args);
             VertexId endpointU;
             VertexId endpointV;
             EdgeData data;
@@ -300,20 +411,14 @@ namespace simple_undirected_graph
 
         // represent an undirected edge by the slot indices of its two endpoint vertices
         using EndpointPair = std::pair<std::size_t, std::size_t>;
+        EndpointPair normalizeEndpoints(VertexId u, VertexId v) const noexcept;
 
-        // custom hasher used by std::unordered_map for EndpointPair keys
+        // incremental hash combiner for composite keys, folds each component into a running hash seed
+        static std::size_t combineHash(std::size_t seed, std::size_t value) noexcept;
         struct EndpointPairHasher
         {
-            std::size_t operator()(const EndpointPair &pair) const
-            {
-                std::size_t hashA = std::hash<std::size_t>{}(pair.first);
-                std::size_t hashB = std::hash<std::size_t>{}(pair.second);
-
-                return hashA ^ (hashB << 1);
-            }
+            std::size_t operator()(const EndpointPair &pair) const noexcept;
         };
-
-        // graph storage //
 
         // provides and ensures unique IDs for graph instances
         inline static std::atomic<std::size_t> nextGraphId_ = 0;
@@ -334,4 +439,4 @@ namespace simple_undirected_graph
         std::unordered_map<EndpointPair, EdgeId, EndpointPairHasher> edgeLookup_;
     };
 }
-#include <simple_undirected_graph/detail/simple_undirected_graph.tpp>
+#include <simple_undirected_graph/detail/graph.tpp>
