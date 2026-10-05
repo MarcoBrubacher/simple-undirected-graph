@@ -123,7 +123,6 @@ namespace simple_undirected_graph
                                                                                                                                    liveEdges_(std::move(sourceGraph.liveEdges_)),
                                                                                                                                    edgeLookup_(std::move(sourceGraph.edgeLookup_))
     {
-        // leave the moved-from graph empty and give it a fresh graph ID
         sourceGraph.clear();
     }
 
@@ -153,7 +152,6 @@ namespace simple_undirected_graph
 
         graphId_ = sourceGraphId;
 
-        // leave the moved-from graph empty and give it a fresh graph ID
         sourceGraph.clear();
 
         return *this;
@@ -185,7 +183,6 @@ namespace simple_undirected_graph
 
         edgeLookup_.clear();
 
-        // give the cleared graph a new ID so all IDs are created before clear() become invalid
         graphId_ = nextGraphId_++;
     }
 
@@ -239,15 +236,13 @@ namespace simple_undirected_graph
         }
 
         std::size_t liveIndex = vertexSlots_[id.index].liveIndex;
-        std::size_t lastLiveIndex = liveVertices_.size() - 1;
 
-        // Erasing from the middle of liveVertices_ would shift later elements and make removal O(n).
-        // Since iteration order is not significant, swap-and-pop is applied instead: (removes an element in O(1) by copying the last element over it and then removing the now-duplicate last element)
-        if (liveIndex != lastLiveIndex)
+        // Erasing from the middle of liveVertices_ would shift later elements, since iteration order is not significant, swap-and-pop is applied instead:
+        if (liveIndex != liveVertices_.size() - 1)
         {
-            VertexId movedId = liveVertices_.back();
+            const VertexId movedId = liveVertices_.back();
             liveVertices_[liveIndex] = movedId;
-            // If another ID is moved into this position, its stored liveIndex must be updated.
+            // Keep vertexSlot.liveIndex in sync with the VertexId's position in liveVertices_.
             vertexSlots_[movedId.index].liveIndex = liveIndex;
         }
         liveVertices_.pop_back();
@@ -267,9 +262,6 @@ namespace simple_undirected_graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     bool Graph<VertexData, EdgeData, GraphData>::vertexExists(VertexId id) const noexcept
     {
-        // validate the ID using cheap checks first and only access the slot once the index is known to be valid
-        // check graphId before touching vertexSlots_, then check the index bounds, and only then inspect the optional stored in that slot, since inspecting a slot is the most expensive
-        // and conclude by comparing the generation to reject stale IDs from an earlier use of the same slot
         if (id.graphId != graphId_ || id.index >= vertexSlots_.size() || !vertexSlots_[id.index].vertex.has_value() || id.generation != vertexSlots_[id.index].generation)
         {
             return false;
@@ -358,7 +350,6 @@ namespace simple_undirected_graph
         std::vector<Adjacency> &adjacencyU = (*vertexSlots_[edge.endpointU.index].vertex).adjacency;
         std::vector<Adjacency> &adjacencyV = (*vertexSlots_[edge.endpointV.index].vertex).adjacency;
 
-        // the Edge directly stores where its entries are located in both adjacency lists, thus no search is required
         std::size_t adjacencyIndexU = edge.adjacencyIndexU;
         std::size_t adjacencyIndexV = edge.adjacencyIndexV;
 
