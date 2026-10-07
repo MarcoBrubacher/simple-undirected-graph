@@ -1,19 +1,15 @@
 set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
-    core/test_construction.cpp
+    core/test_graph.cpp
     core/test_vertices.cpp
     core/test_edges.cpp
     core/test_adjacency.cpp
-    core/test_edge_lookup.cpp
-    core/test_removal.cpp
-    core/test_slot_reuse.cpp
-    core/test_invalid_ids.cpp
     core/test_iteration.cpp
-    core/test_clear.cpp
-    core/test_copy.cpp
-    core/test_move.cpp
-    core/test_properties.cpp
-    core/test_invariants.cpp
+    core/test_copy_move.cpp
+    core/test_ids.cpp
+    core/test_api.cpp
     core/test_exception_safety.cpp
+    core/test_consistency.cpp
+    core/test_randomized.cpp
 )
 
 add_executable(
@@ -25,6 +21,12 @@ target_link_libraries(
     simple_undirected_graph_tests
     PRIVATE
     simple_undirected_graph::simple_undirected_graph
+)
+
+target_include_directories(
+    simple_undirected_graph_tests
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_test(
