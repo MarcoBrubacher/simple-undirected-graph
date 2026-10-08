@@ -23,7 +23,6 @@ int main()
 
     Molecule propene;
 
-    // adding atoms //
     Molecule::VertexId carbon1 = propene.emplaceVertex("C", 6);
     Molecule::VertexId carbon2 = propene.emplaceVertex("C", 6);
     Molecule::VertexId carbon3 = propene.emplaceVertex("C", 6);
@@ -35,7 +34,6 @@ int main()
     Molecule::VertexId hydrogen5 = propene.emplaceVertex("H", 1);
     Molecule::VertexId hydrogen6 = propene.emplaceVertex("H", 1);
 
-    // adding edges //
     Bond singleBond{1};
     propene.addEdge(carbon2, carbon3, singleBond);
 
@@ -47,7 +45,6 @@ int main()
     propene.emplaceEdge(carbon3, hydrogen5, 1);
     propene.emplaceEdge(carbon3, hydrogen6, 1);
 
-    // storing the insertion result //
     std::pair<Molecule::EdgeId, bool> doubleBondInsertion = propene.emplaceEdge(carbon1, carbon2, 2);
 
     Molecule::EdgeId doubleBondId = doubleBondInsertion.first;
@@ -58,7 +55,6 @@ int main()
 
     std::cout << "Bond count: " << propene.edgeCount() << '\n';
 
-    // checking and accessing edges //
     std::cout << "Carbon 1 and carbon 2 connected: " << propene.hasEdge(carbon1, carbon2) << '\n';
     std::cout << "C1-C2 bond order: " << propene.edgeData(doubleBondId).order << '\n';
 
@@ -66,28 +62,23 @@ int main()
     std::cout << "Modified C1-C2 bond order: " << propene.edgeData(doubleBondId).order << '\n';
     propene.edgeData(doubleBondId).order = 2;
 
-    // finding an edge //
     std::optional<Molecule::EdgeId> foundBond = propene.findEdgeId(carbon2, carbon3);
     if (foundBond.has_value())
     {
         std::cout << "C2-C3 bond order: " << propene.edgeData(*foundBond).order << '\n';
     }
 
-    // edge endpoints //
     std::pair<Molecule::VertexId, Molecule::VertexId> bondEndpoints = propene.endpoints(doubleBondId);
     std::cout << "First endpoint exists: " << propene.vertexExists(bondEndpoints.first) << '\n';
     std::cout << "Second endpoint exists: " << propene.vertexExists(bondEndpoints.second) << '\n';
 
-    // duplicate edges //
     std::pair<Molecule::EdgeId, bool> duplicate = propene.emplaceEdge(carbon1, carbon2, 1);
     std::cout << "Duplicate edge inserted: " << duplicate.second << '\n';
     std::cout << "Existing bond order after duplicate insertion: " << propene.edgeData(duplicate.first).order << '\n';
 
-    // removing edges //
     bool removed = propene.removeEdge(doubleBondId);
     std::cout << "Double bond removed: " << removed << '\n';
 
-    // propertyless edges //
     simple_undirected_graph::Graph<> propertylessGraph;
     simple_undirected_graph::Graph<>::VertexId vertex1 = propertylessGraph.addVertex();
     simple_undirected_graph::Graph<>::VertexId vertex2 = propertylessGraph.addVertex();

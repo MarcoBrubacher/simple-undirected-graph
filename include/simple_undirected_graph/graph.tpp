@@ -64,7 +64,7 @@ namespace simple_undirected_graph
           liveEdges_(sourceGraph.liveEdges_),
           edgeLookup_(sourceGraph.edgeLookup_)
     {
-        // every stored VertexId and EdgeId must be updated to belong to this graph
+        // Update copied IDs to the new graph obj
 
         for (VertexId &id : liveVertices_)
         {
@@ -114,7 +114,7 @@ namespace simple_undirected_graph
             return *this;
         }
 
-        // use the copy constructor so the copied graph gets a new graph ID and all IDs inside the copied storage are updated
+        // copy via copy constructor to assign the new graph obj
         Graph copiedGraph(sourceGraph);
 
         *this = std::move(copiedGraph);
@@ -145,7 +145,6 @@ namespace simple_undirected_graph
 
         std::size_t sourceGraphId = sourceGraph.graphId_;
 
-        // do potentially throwing work before changing graph identity
         graphData_ = std::move(sourceGraph.graphData_);
 
         vertexSlots_ = std::move(sourceGraph.vertexSlots_);
@@ -238,7 +237,7 @@ namespace simple_undirected_graph
             return false;
         }
 
-        // removeEdge() removes the edge from both endpoints, so repeatedly removing adjacency.back() eventually isolates this vertex.
+        // removeEdge() removes the edge from both endpoints, so repeatedly removing adjacency.back() eventually isolates this vertex
         while (!(*vertexSlots_[id.index].vertex).adjacency.empty())
         {
             removeEdge((*vertexSlots_[id.index].vertex).adjacency.back().edge);
@@ -246,12 +245,12 @@ namespace simple_undirected_graph
 
         std::size_t liveIndex = vertexSlots_[id.index].liveIndex;
 
-        // Erasing from the middle of liveVertices_ would shift later elements, since iteration order is not significant, swap-and-pop is applied instead:
+        // erasing from the middle of liveVertices_ would shift later elements, since iteration order is not significant, swap-and-pop is applied instead:
         if (liveIndex != liveVertices_.size() - 1)
         {
             const VertexId movedId = liveVertices_.back();
             liveVertices_[liveIndex] = movedId;
-            // Keep vertexSlot.liveIndex in sync with the VertexId's position in liveVertices_.
+            // keep vertexSlot.liveIndex in sync with the VertexId's position in liveVertices_
             vertexSlots_[movedId.index].liveIndex = liveIndex;
         }
         liveVertices_.pop_back();
@@ -510,7 +509,9 @@ namespace simple_undirected_graph
     }
 
     /**
+     * 
      * private functions
+     * 
      */
 
     template <typename VertexData, typename EdgeData, typename GraphData>
@@ -544,7 +545,7 @@ namespace simple_undirected_graph
 
         VertexId id{graphId_, slotIndex, generation};
 
-        // remember where the new VertexId will be appended so partial changes can be undone and liveIndex can later be set directly
+        // store  where the new VertexId will be appended so partial changes can be undone and liveIndex can later be set directly
         const std::size_t oldLiveVerticesSize = liveVertices_.size();
 
         try
