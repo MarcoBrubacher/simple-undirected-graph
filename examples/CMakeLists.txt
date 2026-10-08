@@ -11,7 +11,6 @@ set(SIMPLE_UNDIRECTED_GRAPH_EXAMPLE_SOURCES
 foreach(EXAMPLE_SOURCE IN LISTS SIMPLE_UNDIRECTED_GRAPH_EXAMPLE_SOURCES)
     get_filename_component(EXAMPLE_NAME "${EXAMPLE_SOURCE}" NAME_WE)
 
-    # remove the numeric prefix, for example 01_graph_creation -> graph_creation
     string(REGEX REPLACE "^[0-9]+_" "" EXAMPLE_NAME "${EXAMPLE_NAME}")
 
     add_executable(

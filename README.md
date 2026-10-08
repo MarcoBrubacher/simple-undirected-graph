@@ -1,32 +1,45 @@
 # simple-undirected-graph
 
-A small header-only C++20 library for finite simple undirected graphs.
+A small header-only C++20 library for finite simple undirected graphs, with optional data attached to vertices, edges, and the graph itself.
 
 ## Graph model
 
 The library represents finite simple undirected graphs:
 
-- no self-loops
-- no parallel edges
-- each undirected edge is stored once
+- vertices cannot have self-loops
+- there can be at most one edge between any pair of vertices
+- each undirected edge is represented once
+
+## Access and traversal
+
+Vertices and edges are accessed through IDs rather than references into the internal storage.
+
+The API supports:
+
+- iteration over existing vertices and edges
+- adjacency access
+- vertex, edge, and graph data
+- edge lookup by endpoints
 
 ## Requirements
 
 - C++20
-- CMake 3.21 or newer when building the repository
+- CMake 3.21
 
 ## Goal
 
 The goal is to provide a small and reusable graph container without depending on a large graph framework.
 
-### TODOs
+The core graph API and implementation are mostly complete. The current focus is testing existing behavior and improving the API and implementation where problems are found.
 
-- Test suite
-- Refine/polish the API and internal implementation based on findings from tests and examples.
-- Add benchmarks and investigate further performance improvements.
+## Current work
 
-### Further extensions
+- Writing the test suite
+- Fix bugs and API issues found during testing
+- Add benchmarks and investigate performance, including hash collision behavior
 
-- Add a graph I/O for loading graph data from external files.
-- Support multiple commonly used graph-data formats (only allow cleaned/formatted data).
-- a read-only/frozen graph representation optimized for traversal.
+## Planned extensions
+
+- Add graph I/O for loading graph data from external files
+- Support commonly used graph-data formats, with TUDataset as the first target
+- Add a read-only/frozen graph representation optimized for traversal

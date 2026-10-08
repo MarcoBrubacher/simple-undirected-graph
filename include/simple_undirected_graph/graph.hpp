@@ -221,7 +221,6 @@ namespace simple_undirected_graph
         /**
          * returns editable access to the vertex data
          * this reference becomes invalid if the vertex is removed and may become invalid if vertex storage moves
-         * keep the VertexId and call vertexData(id) again when accessing the vertex later
          * @throws std::invalid_argument if the vertex does not exist
          */
         [[nodiscard]] VertexData &vertexData(VertexId id);
@@ -229,7 +228,6 @@ namespace simple_undirected_graph
         /**
          * returns read-only access to the vertex data
          * this reference becomes invalid if the vertex is removed and may become invalid if vertex storage moves
-         * keep the VertexId and call vertexData(id) again when accessing the vertex later
          * @throws std::invalid_argument if the vertex does not exist
          */
         [[nodiscard]] const VertexData &vertexData(VertexId id) const;
@@ -310,7 +308,6 @@ namespace simple_undirected_graph
         /**
          * returns editable access to the edge data
          * this reference becomes invalid if the edge is removed and may become invalid if edge storage moves
-         * keep the EdgeId and call edgeData(id) again when accessing the edge later
          * @throws std::invalid_argument if the edge does not exist
          */
         [[nodiscard]] EdgeData &edgeData(EdgeId id);
@@ -318,7 +315,6 @@ namespace simple_undirected_graph
         /**
          * returns read-only access to the edge data
          * this reference becomes invalid if the edge is removed and may become invalid if edge storage moves
-         * keep the EdgeId and call edgeData(id) again when accessing the edge later
          * @throws std::invalid_argument if the edge does not exist
          */
         [[nodiscard]] const EdgeData &edgeData(EdgeId id) const;
@@ -334,14 +330,12 @@ namespace simple_undirected_graph
         /**
          * returns read-only access to the existing vertex IDs
          * iteration order is unspecified and may change when the graph topology is modified
-         * the returned span is valid until the graph topology is modified
          */
         [[nodiscard]] std::span<const VertexId> vertices() const noexcept;
 
         /**
          * returns read-only access to the existing edge IDs
          * iteration order is unspecified and may change when the graph topology is modified
-         * the returned span is valid until the graph topology is modified
          */
         [[nodiscard]] std::span<const EdgeId> edges() const noexcept;
 
