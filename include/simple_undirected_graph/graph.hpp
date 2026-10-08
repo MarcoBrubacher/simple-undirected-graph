@@ -20,8 +20,7 @@ namespace simple_undirected_graph
     };
 
     /**
-     * finite simple undirected graph with typed vertex, edge, and graph data
-     * vertices and edges may carry user-defined data, while graph-level data is stored once for the whole graph
+     * finite simple undirected graph with vertex, edge, and graph data
      *
      * @tparam VertexData type stored with each vertex
      * @tparam EdgeData type stored with each edge
@@ -132,7 +131,6 @@ namespace simple_undirected_graph
         /**
          * creates a graph by taking ownership of another graph's contents
          * existing IDs continue to belong to the moved graph
-         * the source graph is left empty with a new graph identity
          * @param sourceGraph graph to move from
          */
         Graph(Graph &&sourceGraph) noexcept(std::is_nothrow_move_constructible_v<GraphData>);
@@ -140,7 +138,6 @@ namespace simple_undirected_graph
         /**
          * replaces this graph by taking ownership of another graph's contents
          * existing IDs continue to belong to the moved graph
-         * the source graph is left empty with a new graph identity
          * @param sourceGraph graph to move from
          * @return this graph
          */
@@ -153,13 +150,12 @@ namespace simple_undirected_graph
         [[nodiscard]] const GraphData &graphData() const noexcept;
 
         /**
-         * removes all vertices and edges (all previously issued vertex and edge IDs become invalid)
+         * removes all vertices and edges (all previously given vertex and edge IDs become invalid)
          */
         void clear() noexcept;
 
         /**
-         * checks whether the graph has no vertices
-         * @return true if the graph is empty, false otherwise
+         * @return true if the graph is empty (has no vertecies), false otherwise
          */
         [[nodiscard]] bool empty() const noexcept;
 
@@ -173,14 +169,14 @@ namespace simple_undirected_graph
             requires std::same_as<VertexData, NoProperties>;
 
         /**
-         * creates a vertex by copying the supplied vertex data
+         * creates a vertex by copying the given vertex data
          * @param vertexData data copied into the vertex
          * @return ID of the new vertex
          */
         VertexId addVertex(const VertexData &vertexData);
 
         /**
-         * creates a vertex by moving the supplied vertex data
+         * creates a vertex by moving the given vertex data
          * @param vertexData data moved into the vertex
          * @return ID of the new vertex
          */
@@ -218,7 +214,6 @@ namespace simple_undirected_graph
         /**
          * returns read-only access to the vertex's adjacency entries
          * adjacency order is unspecified and may change when the graph topology is modified
-         * the returned span is valid until the graph topology is modified
          * @throws std::invalid_argument if the vertex does not exist
          */
         [[nodiscard]] std::span<const Adjacency> adjacency(VertexId id) const;
