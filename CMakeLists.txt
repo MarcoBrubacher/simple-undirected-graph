@@ -33,6 +33,17 @@ option(
     ${PROJECT_IS_TOP_LEVEL}
 )
 
+option(
+    SIMPLE_UNDIRECTED_GRAPH_BUILD_TESTS
+    "Build simple-undirected-graph tests"
+    ${PROJECT_IS_TOP_LEVEL}
+)
+
 if(SIMPLE_UNDIRECTED_GRAPH_BUILD_EXAMPLES)
     add_subdirectory(examples)
+endif()
+
+if(SIMPLE_UNDIRECTED_GRAPH_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
 endif()
