@@ -12,9 +12,7 @@ The library represents finite simple undirected graphs:
 
 ## Access and traversal
 
-Vertices and edges are accessed through IDs rather than references into the internal storage.
-
-The API supports:
+Vertices and edges are accessed through IDs rather than references into the internal storage. The API supports:
 
 - iteration over existing vertices and edges
 - adjacency access
@@ -25,6 +23,29 @@ The API supports:
 
 - C++20
 - CMake 3.21
+
+## Third-party dependencies
+
+The library itself has no external dependencies.
+
+The `external/` directory contains third-party code used for development and testing. Catch2 3.16.0 is vendored there as the test framework so the test suite can be built without downloading additional dependencies.
+
+## Building
+
+Configure and build the library's examples and tests:
+
+```bash
+cmake -S . -B build -DSIMPLE_UNDIRECTED_GRAPH_BUILD_EXAMPLES=ON -DSIMPLE_UNDIRECTED_GRAPH_BUILD_TESTS=ON
+cmake --build build --config Debug --parallel
+```
+
+## Testing
+
+Run all registered tests:
+
+```bash
+ctest --test-dir build -C Debug --output-on-failure
+```
 
 ## Goal
 
