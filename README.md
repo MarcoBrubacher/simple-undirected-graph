@@ -30,6 +30,23 @@ The library itself has no external dependencies.
 
 The `external/` directory contains third-party code used for development and testing. Catch2 3.16.0 is vendored there as the test framework so the test suite can be built without downloading additional dependencies.
 
+## Building
+
+Configure and build the library's examples and tests:
+
+```bash
+cmake -S . -B build -DSIMPLE_UNDIRECTED_GRAPH_BUILD_EXAMPLES=ON -DSIMPLE_UNDIRECTED_GRAPH_BUILD_TESTS=ON
+cmake --build build --config Debug --parallel
+```
+
+## Testing
+
+Run all registered tests:
+
+```bash
+ctest --test-dir build -C Debug --output-on-failure
+```
+
 ## Goal
 
 The goal is to provide a small and reusable graph container without depending on a large graph framework.
