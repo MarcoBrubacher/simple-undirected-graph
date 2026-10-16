@@ -162,7 +162,7 @@ namespace simple_undirected_graph
         // vertex operations //
 
         /**
-         * creates a vertex without properties
+         * creates a vertex without properties (only available for NoProperties)
          * @return ID of the new vertex
          */
         VertexId addVertex()
@@ -184,6 +184,7 @@ namespace simple_undirected_graph
 
         /**
          * creates a vertex by constructing its data directly from the supplied arguments
+         * if no arguments are given, the vertex data is default-initialized
          * @param args arguments forwarded to the VertexData constructor
          * @return ID of the new vertex
          */
