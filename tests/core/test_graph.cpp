@@ -164,3 +164,7 @@ TEST_CASE("clear resets the graph")
         CHECK(graph.edgeCount() == 1);
     }
 }
+
+/**
+ * additional tests / edge cases
+ */
