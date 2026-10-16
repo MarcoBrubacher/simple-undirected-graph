@@ -5,7 +5,7 @@ add_subdirectory(
 
 set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
     core/test_graph.cpp
-    core/test_compile_time.cpp
+    core/test_vertices.cpp
 )
 
 add_executable(
@@ -16,14 +16,14 @@ add_executable(
 target_link_libraries(
     simple_undirected_graph_tests
     PRIVATE
-        simple_undirected_graph::simple_undirected_graph
-        Catch2::Catch2WithMain
+    simple_undirected_graph::simple_undirected_graph
+    Catch2::Catch2WithMain
 )
 
 target_include_directories(
     simple_undirected_graph_tests
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 list(APPEND CMAKE_MODULE_PATH
