@@ -10,6 +10,7 @@
 
 using defaultGraph = simple_undirected_graph::Graph<>;
 
+<<<<<<< HEAD
 static_assert(std::same_as<decltype(std::declval<defaultGraph &>().graphData()), simple_undirected_graph::NoProperties &>,"graphData() must return NoProperties&");
 
 static_assert(std::same_as<decltype(std::declval<const defaultGraph &>().graphData()), const simple_undirected_graph::NoProperties &>,"graphData() const must return const NoProperties&");
@@ -21,6 +22,25 @@ static_assert(noexcept(std::declval<defaultGraph &>().clear()),"clear() must be 
 static_assert(noexcept(std::declval<defaultGraph &>().graphData()),"graphData() must be noexcept");
 
 static_assert(noexcept(std::declval<const defaultGraph &>().graphData()),"graphData() const must be noexcept");
+=======
+static_assert(std::same_as<decltype(std::declval<defaultGraph &>().graphData()), simple_undirected_graph::NoProperties &>,
+              "graphData() must return NoProperties&");
+
+static_assert(std::same_as<decltype(std::declval<const defaultGraph &>().graphData()), const simple_undirected_graph::NoProperties &>,
+              "graphData() const must return const NoProperties&");
+
+static_assert(noexcept(std::declval<const defaultGraph &>().empty()),
+              "empty() must be noexcept");
+
+static_assert(noexcept(std::declval<defaultGraph &>().clear()),
+              "clear() must be noexcept");
+
+static_assert(noexcept(std::declval<defaultGraph &>().graphData()),
+              "graphData() must be noexcept");
+
+static_assert(noexcept(std::declval<const defaultGraph &>().graphData()),
+              "graphData() const must be noexcept");
+>>>>>>> origin/main
 
 /**
  *  graph construction tests

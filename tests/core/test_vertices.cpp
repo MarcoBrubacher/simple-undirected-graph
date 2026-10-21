@@ -12,6 +12,7 @@
 
 using defaultGraph = simple_undirected_graph::Graph<>;
 
+<<<<<<< HEAD
 static_assert(std::same_as<decltype(std::declval<defaultGraph &>().vertexData(std::declval<defaultGraph::VertexId>())), simple_undirected_graph::NoProperties &>,"vertexData() must return NoProperties&");
 
 static_assert(std::same_as<decltype(std::declval<const defaultGraph &>().vertexData(std::declval<defaultGraph::VertexId>())), const simple_undirected_graph::NoProperties &>,"vertexData()const must return const NoProperties&");
@@ -19,6 +20,19 @@ static_assert(std::same_as<decltype(std::declval<const defaultGraph &>().vertexD
 static_assert(noexcept(std::declval<const defaultGraph &>().vertexExists(std::declval<defaultGraph::VertexId>())),"vertexExists() must be noexcept");
 
 static_assert(noexcept(std::declval<const defaultGraph &>().vertexCount()),"vertexCount() must be noexcept");
+=======
+static_assert(std::same_as<decltype(std::declval<defaultGraph &>().vertexData(std::declval<defaultGraph::VertexId>())), simple_undirected_graph::NoProperties &>,
+              "vertexData() must return NoProperties&");
+
+static_assert(std::same_as<decltype(std::declval<const defaultGraph &>().vertexData(std::declval<defaultGraph::VertexId>())), const simple_undirected_graph::NoProperties &>,
+              "vertexData()const must return const NoProperties&");
+
+static_assert(noexcept(std::declval<const defaultGraph &>().vertexExists(std::declval<defaultGraph::VertexId>())),
+              "vertexExists() must be noexcept");
+
+static_assert(noexcept(std::declval<const defaultGraph &>().vertexCount()),
+              "vertexCount() must be noexcept");
+>>>>>>> origin/main
 
 /**
  * vertex  creation

@@ -509,9 +509,11 @@ namespace simple_undirected_graph
     }
 
     /**
-     * 
+     *
+     *
      * private functions
-     * 
+     *
+     *
      */
 
     template <typename VertexData, typename EdgeData, typename GraphData>
