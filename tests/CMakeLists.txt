@@ -6,6 +6,10 @@ add_subdirectory(
 set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
     core/test_graph.cpp
     core/test_vertices.cpp
+    core/test_edges.cpp
+    core/test_adjacency.cpp
+    core/test_iteration.cpp
+    core/test_ids.cpp
 )
 
 add_executable(
@@ -26,9 +30,7 @@ target_include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-list(APPEND CMAKE_MODULE_PATH
-    ${PROJECT_SOURCE_DIR}/external/Catch2/extras
-)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/external/Catch2/extras)
 
 include(Catch)
 
