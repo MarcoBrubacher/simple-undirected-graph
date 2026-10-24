@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(
-    simple_undirected_graph
-    VERSION 0.1.0
-    LANGUAGES CXX
-)
+project(simple_undirected_graph VERSION 0.1.0 LANGUAGES CXX)
 
 add_library(simple_undirected_graph INTERFACE)
 

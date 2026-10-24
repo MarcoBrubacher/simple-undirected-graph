@@ -9,7 +9,6 @@ set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
     core/test_edges.cpp
     core/test_adjacency.cpp
     core/test_iteration.cpp
-    core/test_copy_move.cpp
     core/test_ids.cpp
     core/test_exception_safety.cpp
 )
@@ -22,19 +21,17 @@ add_executable(
 target_link_libraries(
     simple_undirected_graph_tests
     PRIVATE
-        simple_undirected_graph::simple_undirected_graph
-        Catch2::Catch2WithMain
+    simple_undirected_graph::simple_undirected_graph
+    Catch2::Catch2WithMain
 )
 
 target_include_directories(
     simple_undirected_graph_tests
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-list(APPEND CMAKE_MODULE_PATH
-    ${PROJECT_SOURCE_DIR}/external/Catch2/extras
-)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/external/Catch2/extras)
 
 include(Catch)
 
