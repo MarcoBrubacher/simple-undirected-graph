@@ -101,46 +101,23 @@ namespace simple_undirected_graph
             EdgeId edge;
         };
 
-        // creates empty graph with default-initialized graph data
         Graph()
             requires std::default_initializable<GraphData>;
 
-        /**
-         * creates an empty graph with the supplied graph data
-         * @param graphData data stored with the graph
-         */
         explicit Graph(GraphData graphData)
             requires std::constructible_from<GraphData, GraphData &&>;
 
-        /**
-         * creates a new graph by copying another graph
-         * IDs from the source graph are not valid in the copy
-         * @param sourceGraph graph to copy
-         */
+        // source graph IDs are not valid in the copy
         Graph(const Graph &sourceGraph)
             requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &>;
 
-        /**
-         * replaces this graph with a copy of another graph
-         * IDs from the source graph are not valid in this graph after the copy
-         * @param sourceGraph graph to copy
-         * @return this graph
-         */
+        // source graph IDs are not valid in the assigned graph
         Graph &operator=(const Graph &sourceGraph);
 
-        /**
-         * creates a graph by taking ownership of another graph's contents
-         * existing IDs continue to belong to the moved graph
-         * @param sourceGraph graph to move from
-         */
+        // source graph IDs remain valid in the moved-to graph
         Graph(Graph &&sourceGraph) noexcept(std::is_nothrow_move_constructible_v<GraphData>);
 
-        /**
-         * replaces this graph by taking ownership of another graph's contents
-         * existing IDs continue to belong to the moved graph
-         * @param sourceGraph graph to move from
-         * @return this graph
-         */
+        // source graph IDs remain valid in the moved-to graph
         Graph &operator=(Graph &&sourceGraph) noexcept(std::is_nothrow_move_assignable_v<GraphData>);
 
         // returns editable access to the graph data
@@ -149,9 +126,7 @@ namespace simple_undirected_graph
         // returns read-only access to the graph data
         [[nodiscard]] const GraphData &graphData() const noexcept;
 
-        /**
-         * removes all vertices and edges (all previously given vertex and edge IDs become invalid)
-         */
+        // removes all vertices and edges (all previously given vertex and edge IDs become invalid)
         void clear() noexcept;
 
         /**
@@ -349,9 +324,7 @@ namespace simple_undirected_graph
             requires std::constructible_from<EdgeData, Args...>
         std::pair<EdgeId, bool> insertEdge(VertexId u, VertexId v, Args &&...args);
 
-        /**
-         * vertex stored inside a vertex slot
-         */
+        // vertex stored inside a vertex slot
         struct Vertex
         {
             template <typename... Args>
@@ -364,10 +337,7 @@ namespace simple_undirected_graph
             std::vector<Adjacency> adjacency;
         };
 
-        /**
-         * storage for one vertex that can be reused after removal (if the slot is unused the vertex is empty)
-         * generation is increased when a new vertex reuses this slot!
-         */
+        // storage for one vertex that can be reused after removal (if the slot is unused the vertex is empty) generation is increased when a new vertex reuses this slot!
         struct VertexSlot
         {
             std::optional<Vertex> vertex;
@@ -376,9 +346,7 @@ namespace simple_undirected_graph
             std::size_t liveIndex = 0;
         };
 
-        /**
-         * undirected edge stored inside an edge slot
-         */
+        // undirected edge stored inside an edge slot
         struct Edge
         {
             template <typename... Args>
@@ -398,10 +366,7 @@ namespace simple_undirected_graph
             std::size_t adjacencyIndexV;
         };
 
-        /**
-         * storage for one edge that can be reused after removal (if the slot is unused the edge is empty)
-         * generation is increased when a new edge reuses this slot!
-         */
+        // storage for one edge that can be reused after removal (if the slot is unused the edge is empty) generation is increased when a new edge reuses this slot!
         struct EdgeSlot
         {
             std::optional<Edge> edge;

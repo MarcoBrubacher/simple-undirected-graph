@@ -10,6 +10,7 @@ set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
     core/test_adjacency.cpp
     core/test_iteration.cpp
     core/test_ids.cpp
+    core/test_exception_safety.cpp
 )
 
 add_executable(
