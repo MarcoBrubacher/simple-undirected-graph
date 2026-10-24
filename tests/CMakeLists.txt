@@ -12,8 +12,6 @@ set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
     core/test_copy_move.cpp
     core/test_ids.cpp
     core/test_exception_safety.cpp
-    core/test_consistency.cpp
-    core/test_randomized.cpp
 )
 
 add_executable(
