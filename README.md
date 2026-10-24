@@ -55,12 +55,14 @@ The core graph API and implementation are mostly complete. The current focus is 
 
 ## Current work
 
-- Writing the test suite
-- Fix bugs and API issues found during testing
-- Add benchmarks and investigate performance, including hash collision behavior
+- Implement graph I/O for loading graph data from external files, starting with TUDataset
+- Implement a structurally frozen graph representation using CSR, optimized for traversal while allowing vertex, edge, and graph properties to be modified
+- Support loading graph data directly into either mutable `Graph` or CSR-based `FrozenGraph` representations
+- Support freezing existing graphs and converting frozen graphs back into mutable graphs when structural modifications are required
+- Optimize direct CSR construction to avoid unnecessary intermediate graph representations
 
 ## Planned extensions
 
-- Add graph I/O for loading graph data from external files
-- Support commonly used graph-data formats, with TUDataset as the first target
-- Add a read-only/frozen graph representation optimized for traversal
+- Support additional commonly used graph-data formats
+- Add benchmarks and investigate performance, including hash collision behavior
+- Rendering graphs?
