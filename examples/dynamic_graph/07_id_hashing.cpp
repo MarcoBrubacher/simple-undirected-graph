@@ -1,4 +1,4 @@
-#include <simple_undirected_graph/graph.hpp>
+#include <simple_undirected_graph/dynamic_graph.hpp>
 
 #include <iostream>
 #include <string>
@@ -8,7 +8,7 @@
 
 int main()
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
 
     Graph network;
 

@@ -1,4 +1,4 @@
-#include <simple_undirected_graph/graph.hpp>
+#include <simple_undirected_graph/dynamic_graph.hpp>
 
 #include <iostream>
 #include <string>
@@ -18,7 +18,7 @@ struct Road
 
 int main()
 {
-    using Network = simple_undirected_graph::Graph<City, Road>;
+    using Network = simple_undirected_graph::DynamicGraph<City, Road>;
 
     Network network;
 

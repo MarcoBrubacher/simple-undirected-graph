@@ -1,6 +1,6 @@
 
 #include <catch2/catch_test_macros.hpp>
-#include <simple_undirected_graph/graph.hpp>
+#include <simple_undirected_graph/dynamic_graph.hpp>
 #include <stdexcept>
 #include <utility>
 
@@ -73,7 +73,7 @@ struct ThrowingData
 
 TEST_CASE("addVertex handles a throwing property copy")
 {
-    using Graph = simple_undirected_graph::Graph<ThrowingData>;
+    using Graph = simple_undirected_graph::DynamicGraph<ThrowingData>;
     Graph graph;
     const Graph::VertexId a = graph.emplaceVertex(1);
     const ThrowingData data{2, ThrowingData::ThrowOn::copy_construction};
@@ -86,7 +86,7 @@ TEST_CASE("addVertex handles a throwing property copy")
 
 TEST_CASE("emplaceVertex handles a throwing constructor")
 {
-    using Graph = simple_undirected_graph::Graph<ThrowingData>;
+    using Graph = simple_undirected_graph::DynamicGraph<ThrowingData>;
     Graph graph;
     const Graph::VertexId a = graph.emplaceVertex(1);
 
@@ -102,7 +102,7 @@ TEST_CASE("emplaceVertex handles a throwing constructor")
 
 TEST_CASE("addEdge handles a throwing property copy")
 {
-    using Graph = simple_undirected_graph::Graph<int, ThrowingData>;
+    using Graph = simple_undirected_graph::DynamicGraph<int, ThrowingData>;
     Graph graph;
     const Graph::VertexId a = graph.addVertex(1);
     const Graph::VertexId b = graph.addVertex(2);
@@ -117,7 +117,7 @@ TEST_CASE("addEdge handles a throwing property copy")
 
 TEST_CASE("emplaceEdge handles a throwing constructor")
 {
-    using Graph = simple_undirected_graph::Graph<int, ThrowingData>;
+    using Graph = simple_undirected_graph::DynamicGraph<int, ThrowingData>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex(1);
@@ -137,7 +137,7 @@ TEST_CASE("emplaceEdge handles a throwing constructor")
 
 TEST_CASE("copy constructor handles a throwing property copy")
 {
-    using Graph = simple_undirected_graph::Graph<ThrowingData>;
+    using Graph = simple_undirected_graph::DynamicGraph<ThrowingData>;
     Graph src;
 
     const Graph::VertexId a = src.emplaceVertex(1);
@@ -155,7 +155,7 @@ TEST_CASE("copy constructor handles a throwing property copy")
 
 TEST_CASE("copy assignment preserves the target when copying throws")
 {
-    using Graph = simple_undirected_graph::Graph<ThrowingData, int, int>;
+    using Graph = simple_undirected_graph::DynamicGraph<ThrowingData, int, int>;
     Graph src{1};
     Graph target{2};
 
@@ -188,7 +188,7 @@ TEST_CASE("copy assignment preserves the target when copying throws")
 
 TEST_CASE("graph remains usable after a failed insertion")
 {
-    using Graph = simple_undirected_graph::Graph<ThrowingData, ThrowingData>;
+    using Graph = simple_undirected_graph::DynamicGraph<ThrowingData, ThrowingData>;
     Graph graph;
 
     const Graph::VertexId a = graph.emplaceVertex(1);

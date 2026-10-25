@@ -1,6 +1,6 @@
 
 #include <catch2/catch_test_macros.hpp>
-#include <simple_undirected_graph/graph.hpp>
+#include <simple_undirected_graph/dynamic_graph.hpp>
 #include <utility>
 #include <concepts>
 #include <span>
@@ -11,11 +11,11 @@
  * compile time tests
  */
 
-using DefaultGraph = simple_undirected_graph::Graph<>;
+using DefaultGraph = simple_undirected_graph::DynamicGraph<>;
 
-static_assert(std::same_as<decltype(std::declval<const DefaultGraph &>().degree(std::declval<DefaultGraph::VertexId>())), std::size_t>,"degree() must return std::size_t");
+static_assert(std::same_as<decltype(std::declval<const DefaultGraph &>().degree(std::declval<DefaultGraph::VertexId>())), std::size_t>, "degree() must return std::size_t");
 
-static_assert(std::same_as<decltype(std::declval<const DefaultGraph &>().adjacency(std::declval<DefaultGraph::VertexId>())), std::span<const DefaultGraph::Adjacency>>,"adjacency() must return std::span<const Adjacency>");
+static_assert(std::same_as<decltype(std::declval<const DefaultGraph &>().adjacency(std::declval<DefaultGraph::VertexId>())), std::span<const DefaultGraph::Adjacency>>, "adjacency() must return std::span<const Adjacency>");
 
 static_assert(std::same_as<decltype(std::declval<DefaultGraph &>().adjacency(std::declval<DefaultGraph::VertexId>())), std::span<const DefaultGraph::Adjacency>>, "adjacency() must provide read-only adjacency entries");
 
@@ -25,7 +25,7 @@ static_assert(std::same_as<decltype(std::declval<DefaultGraph &>().adjacency(std
 
 TEST_CASE("isolated vertices have degree zero")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -37,7 +37,7 @@ TEST_CASE("isolated vertices have degree zero")
 
 TEST_CASE("degree keeps track of the number of incident edges")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -71,7 +71,7 @@ TEST_CASE("degree keeps track of the number of incident edges")
 
 TEST_CASE("adjacency stores the neighbor and edge ID at both endpoints")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -94,7 +94,7 @@ TEST_CASE("adjacency stores the neighbor and edge ID at both endpoints")
 
 TEST_CASE("adjacency identifies all neighbors regardless of their order")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -137,7 +137,7 @@ TEST_CASE("adjacency identifies all neighbors regardless of their order")
 
 TEST_CASE("adjacency can be read from a const graph")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -156,7 +156,7 @@ TEST_CASE("adjacency can be read from a const graph")
 
 TEST_CASE("adding a duplicate edge does not duplicate adjacency entries")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -186,7 +186,7 @@ TEST_CASE("adding a duplicate edge does not duplicate adjacency entries")
 
 TEST_CASE("removeEdge updates adjacency at both endpoints")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -217,7 +217,7 @@ TEST_CASE("removeEdge updates adjacency at both endpoints")
 
 TEST_CASE("removing edges preserves adjacency after reordering")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -257,7 +257,7 @@ TEST_CASE("removing edges preserves adjacency after reordering")
 
 TEST_CASE("removeVertex updates adjacency of its former neighbors")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -292,7 +292,7 @@ TEST_CASE("removeVertex updates adjacency of its former neighbors")
 
 TEST_CASE("reusing a vertex slot does not restore stale adjacency entries")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -341,7 +341,7 @@ TEST_CASE("reusing a vertex slot does not restore stale adjacency entries")
 
 TEST_CASE("degree throws for invalid vertex IDs")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -363,7 +363,7 @@ TEST_CASE("degree throws for invalid vertex IDs")
 
 TEST_CASE("adjacency throws for invalid vertex IDs")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();

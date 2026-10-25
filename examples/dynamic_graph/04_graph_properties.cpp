@@ -1,4 +1,4 @@
-#include <simple_undirected_graph/graph.hpp>
+#include <simple_undirected_graph/dynamic_graph.hpp>
 
 #include <iostream>
 #include <string>
@@ -14,7 +14,7 @@ struct MoleculeInformation
 
 int main()
 {
-    using Molecule = simple_undirected_graph::Graph<simple_undirected_graph::NoProperties, simple_undirected_graph::NoProperties, MoleculeInformation>;
+    using Molecule = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, simple_undirected_graph::NoProperties, MoleculeInformation>;
 
     Molecule benzene(MoleculeInformation{"Benzene", "C6H6", 0});
 

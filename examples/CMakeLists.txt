@@ -1,11 +1,11 @@
 set(SIMPLE_UNDIRECTED_GRAPH_EXAMPLE_SOURCES
-    core/01_graph_creation.cpp
-    core/02_vertex_operations.cpp
-    core/03_edge_operations.cpp
-    core/04_graph_properties.cpp
-    core/05_graph_copy_move.cpp
-    core/06_iteration.cpp
-    core/07_id_hashing.cpp
+    dynamic_graph/01_graph_creation.cpp
+    dynamic_graph/02_vertex_operations.cpp
+    dynamic_graph/03_edge_operations.cpp
+    dynamic_graph/04_graph_properties.cpp
+    dynamic_graph/05_graph_copy_move.cpp
+    dynamic_graph/06_iteration.cpp
+    dynamic_graph/07_id_hashing.cpp
 )
 
 foreach(EXAMPLE_SOURCE IN LISTS SIMPLE_UNDIRECTED_GRAPH_EXAMPLE_SOURCES)

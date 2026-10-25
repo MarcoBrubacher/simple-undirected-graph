@@ -1,6 +1,6 @@
 
 #include <catch2/catch_test_macros.hpp>
-#include <simple_undirected_graph/graph.hpp>
+#include <simple_undirected_graph/dynamic_graph.hpp>
 #include <utility>
 #include <concepts>
 #include <type_traits>
@@ -15,7 +15,7 @@
  * compile time tests
  */
 
-using DefaultGraph = simple_undirected_graph::Graph<>;
+using DefaultGraph = simple_undirected_graph::DynamicGraph<>;
 
 static_assert(std::copy_constructible<DefaultGraph>, "Graph<> must be copy-constructible");
 
@@ -33,7 +33,7 @@ static_assert(std::is_nothrow_move_constructible_v<DefaultGraph>, "Graph<> move 
 
 static_assert(std::is_nothrow_move_assignable_v<DefaultGraph>, "Graph<> move assignment must be noexcept");
 
-using MoveOnlyGraph = simple_undirected_graph::Graph<std::unique_ptr<int>, std::unique_ptr<int>, std::unique_ptr<int>>;
+using MoveOnlyGraph = simple_undirected_graph::DynamicGraph<std::unique_ptr<int>, std::unique_ptr<int>, std::unique_ptr<int>>;
 
 static_assert(!std::copy_constructible<MoveOnlyGraph>, "a graph with move-only properties must not be copy-constructible");
 
@@ -47,7 +47,7 @@ static_assert(std::is_move_assignable_v<MoveOnlyGraph>, "a graph with move-only 
 
 TEST_CASE("copy constructor copies an empty graph")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph og;
 
     Graph copy(og);
@@ -59,7 +59,7 @@ TEST_CASE("copy constructor copies an empty graph")
 
 TEST_CASE("copy constructor copies graph, vertex and edge properties")
 {
-    using Graph = simple_undirected_graph::Graph<std::string, std::string, int>;
+    using Graph = simple_undirected_graph::DynamicGraph<std::string, std::string, int>;
     Graph og{1};
 
     const Graph::VertexId a = og.addVertex("vertex a");
@@ -99,7 +99,7 @@ TEST_CASE("copy constructor copies graph, vertex and edge properties")
 
 TEST_CASE("copy constructor preserves topology with new graph-specific IDs")
 {
-    using Graph = simple_undirected_graph::Graph<int>;
+    using Graph = simple_undirected_graph::DynamicGraph<int>;
     Graph og;
 
     const Graph::VertexId a = og.addVertex(1);
@@ -166,7 +166,7 @@ TEST_CASE("copy constructor preserves topology with new graph-specific IDs")
 
 TEST_CASE("copy constructor creates an independent graph")
 {
-    using Graph = simple_undirected_graph::Graph<int, int, std::string>;
+    using Graph = simple_undirected_graph::DynamicGraph<int, int, std::string>;
     Graph og{"the og"};
 
     const Graph::VertexId a = og.addVertex(1);
@@ -207,7 +207,7 @@ TEST_CASE("copy constructor creates an independent graph")
 
 TEST_CASE("copy assignment replaces contents and invalidates old IDs")
 {
-    using Graph = simple_undirected_graph::Graph<int, int, std::string>;
+    using Graph = simple_undirected_graph::DynamicGraph<int, int, std::string>;
     Graph src{"src"};
     Graph target{"target"};
 
@@ -262,7 +262,7 @@ TEST_CASE("copy assignment replaces contents and invalidates old IDs")
 
 TEST_CASE("copy assignment creates an independent graph")
 {
-    using Graph = simple_undirected_graph::Graph<int, int, std::string>;
+    using Graph = simple_undirected_graph::DynamicGraph<int, int, std::string>;
     Graph src{"original"};
     Graph target{"target"};
 
@@ -298,7 +298,7 @@ TEST_CASE("copy assignment creates an independent graph")
 
 TEST_CASE("copy assignment handles self-assignment")
 {
-    using Graph = simple_undirected_graph::Graph<int, int, int>;
+    using Graph = simple_undirected_graph::DynamicGraph<int, int, int>;
     Graph graph{1};
 
     const Graph::VertexId a = graph.addVertex(2);
@@ -327,7 +327,7 @@ TEST_CASE("copy assignment handles self-assignment")
 
 TEST_CASE("move constructor transfers contents and preserves IDs")
 {
-    using Graph = simple_undirected_graph::Graph<std::string, std::string, std::string>;
+    using Graph = simple_undirected_graph::DynamicGraph<std::string, std::string, std::string>;
     Graph src{"graph"};
 
     const Graph::VertexId a = src.addVertex("a");
@@ -350,7 +350,7 @@ TEST_CASE("move constructor transfers contents and preserves IDs")
 
 TEST_CASE("move constructor leaves the source empty and reusable")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph src;
 
     const Graph::VertexId a = src.addVertex();
@@ -384,7 +384,7 @@ TEST_CASE("move constructor leaves the source empty and reusable")
 
 TEST_CASE("move assignment replaces contents and preserves transferred IDs")
 {
-    using Graph = simple_undirected_graph::Graph<std::string, std::string, std::string>;
+    using Graph = simple_undirected_graph::DynamicGraph<std::string, std::string, std::string>;
     Graph src{"src"};
     Graph target{"target"};
 
@@ -418,7 +418,7 @@ TEST_CASE("move assignment replaces contents and preserves transferred IDs")
 
 TEST_CASE("move assignment leaves the source empty and reusable")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph src;
     Graph target;
 
@@ -447,7 +447,7 @@ TEST_CASE("move assignment leaves the source empty and reusable")
 
 TEST_CASE("move assignment handles self-assignment")
 {
-    using Graph = simple_undirected_graph::Graph<int, int, int>;
+    using Graph = simple_undirected_graph::DynamicGraph<int, int, int>;
     Graph graph{9};
 
     const Graph::VertexId a = graph.addVertex(2);
