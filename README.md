@@ -47,12 +47,6 @@ Run all registered tests:
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
-## Goal
-
-The goal is to provide a small and reusable graph container without depending on a large graph framework.
-
-The core graph API and implementation are mostly complete. The current focus is testing existing behavior and improving the API and implementation where problems are found.
-
 ## Current work
 
 - Implement graph I/O for loading graph data from external files, starting with TUDataset
