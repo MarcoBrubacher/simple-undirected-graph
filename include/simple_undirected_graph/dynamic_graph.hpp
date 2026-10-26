@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <concepts>
 #include <type_traits>
+#include <atomic>
 
 namespace simple_undirected_graph
 {
@@ -99,27 +100,22 @@ namespace simple_undirected_graph
 
         DynamicGraph()
             requires std::default_initializable<GraphData>;
-
         explicit DynamicGraph(GraphData graphData)
             requires std::constructible_from<GraphData, GraphData &&>;
 
         // source graph IDs are not valid in the copy
         DynamicGraph(const DynamicGraph &sourceGraph)
             requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &>;
-
         // source graph IDs are not valid in the assigned graph
-        DynamicGraph &operator=(const DynamicGraph &sourceGraph);
+        DynamicGraph &operator=(const DynamicGraph &sourceGraph)
+            requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &>;
 
         // source graph IDs remain valid in the moved-to graph
         DynamicGraph(DynamicGraph &&sourceGraph) noexcept(std::is_nothrow_move_constructible_v<GraphData>);
-
         // source graph IDs remain valid in the moved-to graph
         DynamicGraph &operator=(DynamicGraph &&sourceGraph) noexcept(std::is_nothrow_move_assignable_v<GraphData>);
 
-        // returns editable access to the graph data
         [[nodiscard]] GraphData &graphData() noexcept;
-
-        // returns read-only access to the graph data
         [[nodiscard]] const GraphData &graphData() const noexcept;
 
         // removes all vertices and edges (all previously given vertex and edge IDs become invalid)
@@ -190,49 +186,32 @@ namespace simple_undirected_graph
          */
         [[nodiscard]] std::span<const Adjacency> adjacency(VertexId id) const;
 
-        /**
-         * returns editable access to the vertex data
-         * this reference becomes invalid if the vertex is removed and may become invalid if vertex storage moves
-         * @throws std::invalid_argument if the vertex does not exist
-         */
+        // this reference becomes invalid if the vertex is removed and may become invalid if vertex storage moves
+        // throws std::invalid_argument if the vertex does not exist
         [[nodiscard]] VertexData &vertexData(VertexId id);
-
-        /**
-         * returns read-only access to the vertex data
-         * this reference becomes invalid if the vertex is removed and may become invalid if vertex storage moves
-         * @throws std::invalid_argument if the vertex does not exist
-         */
         [[nodiscard]] const VertexData &vertexData(VertexId id) const;
 
         // edge operations //
 
         /**
-         * creates an edge without properties
-         * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
-         * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
+         * adds an edge without properties
+         * @return {edge ID, true} if inserted, otherwise {existing edge ID, false}
+         * @throws std::invalid_argument for invalid vertices or self-loops
          */
         std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v)
             requires std::same_as<EdgeData, NoProperties>;
 
         /**
-         * creates an edge with the supplied edge data
-         * existing edge data is left unchanged if the edge already exists
-         * @param u first endpoint
-         * @param v second endpoint
-         * @param edgeData data stored with the edge
-         * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
-         * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
+         * adds an edge by copying its data, leaves existing edge data unchanged
+         * @return {edge ID, true} if inserted, otherwise {existing edge ID, false}
+         * @throws std::invalid_argument for invalid vertices or self-loops
          */
         std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v, const EdgeData &edgeData);
 
         /**
-         * creates an edge with the supplied edge data
-         * existing edge data is left unchanged if the edge already exists
-         * @param u first endpoint
-         * @param v second endpoint
-         * @param edgeData data moved into the edge
-         * @return {edge ID, true} if a new edge was added, otherwise {existing edge ID, false}
-         * @throws std::invalid_argument if a vertex does not exist or both endpoints refer to the same vertex
+         * adds an edge by moving its data, leaves existing edge data unchanged
+         * @return {edge ID, true} if inserted, otherwise {existing edge ID, false}
+         * @throws std::invalid_argument for invalid vertices or self-loops
          */
         std::pair<EdgeId, bool> addEdge(VertexId u, VertexId v, EdgeData &&edgeData);
 
@@ -277,18 +256,9 @@ namespace simple_undirected_graph
          */
         [[nodiscard]] std::optional<EdgeId> findEdgeId(VertexId u, VertexId v) const;
 
-        /**
-         * returns editable access to the edge data
-         * this reference becomes invalid if the edge is removed and may become invalid if edge storage moves
-         * @throws std::invalid_argument if the edge does not exist
-         */
+        // this reference becomes invalid if the edge is removed and may become invalid if edge storage moves
+        // throws std::invalid_argument if the edge does not exist
         [[nodiscard]] EdgeData &edgeData(EdgeId id);
-
-        /**
-         * returns read-only access to the edge data
-         * this reference becomes invalid if the edge is removed and may become invalid if edge storage moves
-         * @throws std::invalid_argument if the edge does not exist
-         */
         [[nodiscard]] const EdgeData &edgeData(EdgeId id) const;
 
         /**

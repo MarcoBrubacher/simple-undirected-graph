@@ -37,6 +37,8 @@ using MoveOnlyGraph = simple_undirected_graph::DynamicGraph<std::unique_ptr<int>
 
 static_assert(!std::copy_constructible<MoveOnlyGraph>, "a graph with move-only properties must not be copy-constructible");
 
+static_assert(!std::is_copy_assignable_v<MoveOnlyGraph>, "a graph with move-only properties must not be copy-assignable");
+
 static_assert(std::move_constructible<MoveOnlyGraph>, "a graph with move-only properties must be move-constructible");
 
 static_assert(std::is_move_assignable_v<MoveOnlyGraph>, "a graph with move-only properties must be move-assignable");

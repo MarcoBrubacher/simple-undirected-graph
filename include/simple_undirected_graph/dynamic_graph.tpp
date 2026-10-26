@@ -18,9 +18,9 @@ namespace simple_undirected_graph
     {
         std::size_t seed = 0;
 
-        seed = detail::combineHash(seed, id.graphId);
-        seed = detail::combineHash(seed, id.index);
-        seed = detail::combineHash(seed, id.generation);
+        seed = DynamicGraph::combineHash(seed, id.graphId);
+        seed = DynamicGraph::combineHash(seed, id.index);
+        seed = DynamicGraph::combineHash(seed, id.generation);
 
         return seed;
     }
@@ -30,9 +30,9 @@ namespace simple_undirected_graph
     {
         std::size_t seed = 0;
 
-        seed = detail::combineHash(seed, id.graphId);
-        seed = detail::combineHash(seed, id.index);
-        seed = detail::combineHash(seed, id.generation);
+        seed = DynamicGraph::combineHash(seed, id.graphId);
+        seed = DynamicGraph::combineHash(seed, id.index);
+        seed = DynamicGraph::combineHash(seed, id.generation);
 
         return seed;
     }
@@ -108,6 +108,7 @@ namespace simple_undirected_graph
 
     template <typename VertexData, typename EdgeData, typename GraphData>
     DynamicGraph<VertexData, EdgeData, GraphData> &DynamicGraph<VertexData, EdgeData, GraphData>::operator=(const DynamicGraph &sourceGraph)
+        requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &>
     {
         if (this == &sourceGraph)
         {
@@ -726,12 +727,26 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
+    std::size_t DynamicGraph<VertexData, EdgeData, GraphData>::combineHash(std::size_t seed, std::size_t value) noexcept
+    {
+        // simple baseline mixer. TODO: replace after benchmarking hash strategies
+        constexpr std::size_t bitCount = sizeof(std::size_t) * 8;
+
+        value ^= value >> (bitCount / 2);
+
+        seed ^= value;
+        seed += (seed << 5) + (seed >> 3) + 1;
+
+        return seed;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
     std::size_t DynamicGraph<VertexData, EdgeData, GraphData>::EndpointPairHasher::operator()(const EndpointPair &pair) const noexcept
     {
         std::size_t seed = 0;
 
-        seed = detail::combineHash(seed, pair.first);
-        seed = detail::combineHash(seed, pair.second);
+        seed = DynamicGraph::combineHash(seed, pair.first);
+        seed = DynamicGraph::combineHash(seed, pair.second);
 
         return seed;
     }

@@ -1,8 +1,13 @@
 #pragma once
+
 #include <simple_undirected_graph/graph.hpp>
+#include <concepts>
 #include <cstddef>
-#include <vector>
+#include <cstdint>
+#include <optional>
+#include <span>
 #include <utility>
+#include <vector>
 
 namespace simple_undirected_graph
 {
@@ -16,86 +21,146 @@ namespace simple_undirected_graph
      * @tparam EdgeData type stored with each edge
      * @tparam GraphData type stored with the whole graph
      */
-
     template <typename VertexData = NoProperties, typename EdgeData = NoProperties, typename GraphData = NoProperties>
     class CSRGraph
     {
     public:
-        struct VertexIdHash;
-        struct EdgeIdHash;
+        using Index = std::uint32_t;
+        using VertexId = Index;
+        using EdgeId = Index;
+
+        CSRGraph()
+            requires std::default_initializable<GraphData>;
+
+        explicit CSRGraph(GraphData graphData)
+            requires std::constructible_from<GraphData, GraphData &&>;
+
+        CSRGraph(const CSRGraph &sourceGraph)
+            requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &>;
+        CSRGraph &operator=(const CSRGraph &sourceGraph)
+            requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &> && std::assignable_from<GraphData &, GraphData &&>;
+        CSRGraph(CSRGraph &&sourceGraph)
+            requires std::constructible_from<GraphData, GraphData &&>;
+        CSRGraph &operator=(CSRGraph &&sourceGraph)
+            requires std::assignable_from<GraphData &, GraphData &&>;
+
+        // graph operations //
 
         /**
-         * identifies one vertex in one graph instance
-         * an ID becomes invalid if it is used with another graph
+         * constructs a graph from precomputed CSR arrays
+         *
+         * ensures every edge connects two different vertices and appears in both directions
+         * rejects invalid indices and duplicate edges
+         * @throws std::invalid_argument if the input is invalid or exceeds the Index range
          */
-        struct VertexId
-        {
-        public:
-            bool operator==(const VertexId &) const noexcept = default;
+        [[nodiscard]] static CSRGraph fromCSRFormat(std::vector<VertexData> vertexData,
+                                                    std::vector<EdgeData> edgeData,
+                                                    std::vector<std::size_t> offsets,
+                                                    std::vector<Index> neighbors,
+                                                    std::vector<Index> edgeIndices,
+                                                    GraphData graphData);
 
-        private:
-            friend class CSRGraph;
-            friend struct VertexIdHash;
+        [[nodiscard]] GraphData &graphData() noexcept;
+        [[nodiscard]] const GraphData &graphData() const noexcept;
 
-            VertexId(std::size_t graphId, std::size_t index);
+        [[nodiscard]] bool empty() const noexcept;
 
-            // is the ID of the graph this vertex belongs to and must match graphId_
-            std::size_t graphId;
-            // is the index of this vertex in vertexData_ and offsets_
-            std::size_t index;
-        };
+        // vertex operations //
 
         /**
-         * identifies one edge in one graph instance
-         * an ID becomes invalid if it is used with another graph
+         * checks whether the ID refers to an existing vertex in this graph
+         * @return false for another graph or an invalid index
          */
-        struct EdgeId
-        {
-        public:
-            bool operator==(const EdgeId &) const noexcept = default;
+        [[nodiscard]] bool vertexExists(VertexId id) const noexcept;
 
-        private:
-            friend class CSRGraph;
-            friend struct EdgeIdHash;
+        [[nodiscard]] std::size_t vertexCount() const noexcept;
 
-            EdgeId(std::size_t graphId, std::size_t index);
+        /**
+         * returns the number of neighbors of a vertex
+         * @pre vertex < vertexCount()
+         */
+        [[nodiscard]] std::size_t degree(VertexId vertex) const noexcept;
 
-            // is the ID of the graph this edge belongs to and must match graphId_
-            std::size_t graphId;
-            // is the index of this edge in edgeData_ and endpoints_
-            std::size_t index;
-        };
+        /**
+         * returns the neighboring vertex indices
+         * @pre vertex < vertexCount()
+         */
+        [[nodiscard]] std::span<const Index> neighbors(VertexId vertex) const noexcept;
 
-        // allows vertex and edge IDs to be used as keys in hash-based containers (buckets)
-        struct VertexIdHash
-        {
-            std::size_t operator()(const VertexId &id) const noexcept;
-        };
-        struct EdgeIdHash
-        {
-            std::size_t operator()(const EdgeId &id) const noexcept;
-        };
+        /**
+         * returns the edge indices corresponding to neighbors()
+         * @pre vertex < vertexCount()
+         */
+        [[nodiscard]] std::span<const Index> incidentEdgeIndices(VertexId vertex) const noexcept;
+
+        // Access one vertex data
+        [[nodiscard]] VertexData &vertexData(VertexId id) noexcept;
+        [[nodiscard]] const VertexData &vertexData(VertexId id) const noexcept;
+        // Access all vertices data
+        [[nodiscard]] std::span<VertexData> vertexData() noexcept;
+        [[nodiscard]] std::span<const VertexData> vertexData() const noexcept;
+
+        // edge operations //
+
+        /**
+         * checks whether the ID refers to an existing edge in this graph
+         * @return false for another graph or an invalid index
+         */
+        [[nodiscard]] bool edgeExists(EdgeId id) const noexcept;
+
+        /**
+         * checks whether an edge connects two vertices
+         * @pre u < vertexCount() && v < vertexCount()
+         */
+        [[nodiscard]] bool hasEdge(VertexId u, VertexId v) const noexcept;
+
+        /**
+         * finds the edge connecting two vertices
+         * @return edge ID if an edge exists, std::nullopt otherwise
+         * @pre u < vertexCount() && v < vertexCount()
+         */
+        [[nodiscard]] std::optional<EdgeId> findEdgeId(VertexId u, VertexId v) const noexcept;
+
+        [[nodiscard]] std::size_t edgeCount() const noexcept;
+
+        // Access one edge data
+        [[nodiscard]] EdgeData &edgeData(EdgeId id) noexcept;
+        [[nodiscard]] const EdgeData &edgeData(EdgeId id) const noexcept;
+        // Access all edges data
+        [[nodiscard]] std::span<EdgeData> edgeData() noexcept;
+        [[nodiscard]] std::span<const EdgeData> edgeData() const noexcept;
+
+        /**
+         * reconstructs edge endpoints for algorithms requiring direct edge-based access, avoids storing endpoints permanently to minimize memory usage
+         * @return endpoint pairs indexed by EdgeId
+         */
+        [[nodiscard]] std::vector<std::pair<VertexId, VertexId>> reconstructEdgeEndpoints() const;
+
+        // direct CSR access //
+
+        // returns the boundaries of all vertex adjacency ranges
+        [[nodiscard]] std::span<const std::size_t> offsets() const noexcept;
+        // returns all neighboring vertex indices in CSR order
+        [[nodiscard]] std::span<const Index> neighborIndices() const noexcept;
+
+        // returns the edge index corresponding to each neighboring vertex entry
+        [[nodiscard]] std::span<const Index> adjacencyEdgeIndices() const noexcept;
 
     private:
-        // data stored with the whole graph
-        GraphData graphData_;
-        // identifies this graph instance
-        std::size_t graphId_;
+        // resets graph topolgy after move
+        void resetGraph();
 
-        // vertex properties indexed by vertex index
+        GraphData graphData_;
+
         std::vector<VertexData> vertexData_;
-        // edge properties indexed by edge index
         std::vector<EdgeData> edgeData_;
 
-        // offsets_[i] and offsets_[i + 1] define the adjacency range of vertex i
+        // start and end of each vertecies neighbor range
         std::vector<std::size_t> offsets_{0};
-        // neighboring vertex indices stored consecutively for all vertices
-        std::vector<std::size_t> neighbors_;
-        // edge index corresponding to each entry in neighbors_
-        std::vector<std::size_t> edgeIndices_;
-        // stores both endpoint indices of each undirected edge
-        std::vector<std::pair<std::size_t, std::size_t>> endpoints_;
+        // neighboring vertex indices
+        std::vector<Index> neighbors_;
+        // edge index for each neighbor entry
+        std::vector<Index> edgeIndices_;
     };
-
 }
 #include <simple_undirected_graph/csr_graph.tpp>
