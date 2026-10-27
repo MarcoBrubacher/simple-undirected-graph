@@ -15,8 +15,7 @@ namespace simple_undirected_graph
     /**
      * finite simple undirected graph with fixed CSR topology
      *
-     * vertex, edge, and graph data remain mutable
-     * structural modifications are not supported
+     * vertex, edge, and graph data remain mutable, but structural modifications are not supported
      *
      * @tparam VertexData type stored with each vertex
      * @tparam EdgeData type stored with each edge

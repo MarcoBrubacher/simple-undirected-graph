@@ -1,4 +1,6 @@
 #include <simple_undirected_graph/csr_graph.hpp>
+#include <string>
+#include <vector>
 
 int main()
 {
@@ -8,7 +10,8 @@ int main()
 
     simple_undirected_graph::CSRGraph<std::vector<int>, float, double> complexGraph;
 
-    simple_undirected_graph::CSRGraph<bool, float, std::string> initializedGraph("Is a graph");
+    // use byteBool instead of bool to avoid the special behavior of std::vector<bool>
+    simple_undirected_graph::CSRGraph<simple_undirected_graph::byteBool, float, std::string> initializedGraph("Is a graph");
 
     return 0;
 }
