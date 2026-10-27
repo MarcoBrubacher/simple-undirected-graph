@@ -8,6 +8,7 @@
 #include <span>
 #include <utility>
 #include <vector>
+#include <type_traits>
 
 namespace simple_undirected_graph
 {
@@ -39,9 +40,10 @@ namespace simple_undirected_graph
             requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &>;
         CSRGraph &operator=(const CSRGraph &sourceGraph)
             requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &> && std::assignable_from<GraphData &, GraphData &&>;
-        CSRGraph(CSRGraph &&sourceGraph)
+
+        CSRGraph(CSRGraph &&sourceGraph) noexcept(std::is_nothrow_move_constructible_v<GraphData>)
             requires std::constructible_from<GraphData, GraphData &&>;
-        CSRGraph &operator=(CSRGraph &&sourceGraph)
+        CSRGraph &operator=(CSRGraph &&sourceGraph) noexcept(std::is_nothrow_move_assignable_v<GraphData>)
             requires std::assignable_from<GraphData &, GraphData &&>;
 
         // graph operations //
@@ -147,11 +149,7 @@ namespace simple_undirected_graph
         [[nodiscard]] std::span<const Index> adjacencyEdgeIndices() const noexcept;
 
     private:
-        // resets graph topolgy after move
-        void resetGraph();
-
-        GraphData graphData_;
-
+        GraphData graphData_{};
         std::vector<VertexData> vertexData_;
         std::vector<EdgeData> edgeData_;
 

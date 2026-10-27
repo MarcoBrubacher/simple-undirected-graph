@@ -115,10 +115,9 @@ namespace simple_undirected_graph
             return *this;
         }
 
-        // copy via copy constructor to assign the new graph obj
-        DynamicGraph copiedGraph(sourceGraph);
+        DynamicGraph copy(sourceGraph);
 
-        *this = std::move(copiedGraph);
+        *this = std::move(copy);
         return *this;
     }
 

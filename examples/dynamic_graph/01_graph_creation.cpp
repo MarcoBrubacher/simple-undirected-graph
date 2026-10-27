@@ -1,8 +1,5 @@
 #include <simple_undirected_graph/dynamic_graph.hpp>
 
-#include <string>
-#include <vector>
-
 int main()
 {
     simple_undirected_graph::DynamicGraph<> defaultGraph;
