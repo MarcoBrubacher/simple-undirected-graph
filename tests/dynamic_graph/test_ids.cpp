@@ -34,7 +34,7 @@ static_assert(noexcept(std::declval<const DefaultGraph::EdgeIdHash &>()(std::dec
  * ID equality and uniqueness
  */
 
-TEST_CASE("vertex IDs distinguish different existing vertices")
+TEST_CASE("Dynamic graph: vertex IDs distinguish different existing vertices")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -53,7 +53,7 @@ TEST_CASE("vertex IDs distinguish different existing vertices")
     CHECK(graph.vertexExists(c));
 }
 
-TEST_CASE("edge IDs distinguish different existing edges")
+TEST_CASE("Dynamic graph: edge IDs distinguish different existing edges")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -79,7 +79,7 @@ TEST_CASE("edge IDs distinguish different existing edges")
  * graph ownership
  */
 
-TEST_CASE("vertex IDs belong to their graph instance")
+TEST_CASE("Dynamic graph: vertex IDs belong to their graph instance")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graphA;
@@ -95,7 +95,7 @@ TEST_CASE("vertex IDs belong to their graph instance")
     CHECK_FALSE(graphB.vertexExists(idA));
 }
 
-TEST_CASE("edge IDs belong to their graph instance")
+TEST_CASE("Dynamic graph: edge IDs belong to their graph instance")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graphA;
@@ -122,7 +122,7 @@ TEST_CASE("edge IDs belong to their graph instance")
  * generation and reuse
  */
 
-TEST_CASE("reused vertex slots keep old vertex IDs invalid")
+TEST_CASE("Dynamic graph: reused vertex slots keep old vertex IDs invalid")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -150,7 +150,7 @@ TEST_CASE("reused vertex slots keep old vertex IDs invalid")
     CHECK(graph.vertexExists(currentId));
 }
 
-TEST_CASE("reused edge slots keep old edge IDs invalid")
+TEST_CASE("Dynamic graph: reused edge slots keep old edge IDs invalid")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -187,7 +187,7 @@ TEST_CASE("reused edge slots keep old edge IDs invalid")
     CHECK(graph.edgeExists(currentId));
 }
 
-TEST_CASE("clear invalidates vertex and edge IDs even after new insertions")
+TEST_CASE("Dynamic graph: clear invalidates vertex and edge IDs even after new insertions")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -226,7 +226,7 @@ TEST_CASE("clear invalidates vertex and edge IDs even after new insertions")
  * hashing
  */
 
-TEST_CASE("VertexIdHash supports IDs as unordered set keys")
+TEST_CASE("Dynamic graph: VertexIdHash supports IDs as unordered set keys")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -257,7 +257,7 @@ TEST_CASE("VertexIdHash supports IDs as unordered set keys")
     CHECK(graph.vertexExists(newA));
 }
 
-TEST_CASE("EdgeIdHash supports IDs as unordered map keys")
+TEST_CASE("Dynamic graph: EdgeIdHash supports IDs as unordered map keys")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -296,7 +296,7 @@ TEST_CASE("EdgeIdHash supports IDs as unordered map keys")
  * copied graphs
  */
 
-TEST_CASE("copying a graph gives copied vertices and edges new graph-specific IDs")
+TEST_CASE("Dynamic graph: copying a graph gives copied vertices and edges new graph-specific IDs")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph source;

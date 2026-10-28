@@ -24,7 +24,7 @@ static_assert(noexcept(std::declval<const defaultGraph &>().vertexCount()), "ver
  * vertex  creation
  */
 
-TEST_CASE("addVertex without properties")
+TEST_CASE("Dynamic graph: addVertex without properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -35,7 +35,7 @@ TEST_CASE("addVertex without properties")
     CHECK(graph.vertexExists(id));
 }
 
-TEST_CASE("addVertex by copying the given vertex data")
+TEST_CASE("Dynamic graph: addVertex by copying the given vertex data")
 {
     using Graph = simple_undirected_graph::DynamicGraph<std::string>;
     Graph graph;
@@ -53,7 +53,7 @@ TEST_CASE("addVertex by copying the given vertex data")
     CHECK(graph.vertexData(id) == "original string");
 }
 
-TEST_CASE("addVertex by moving the given vertex data")
+TEST_CASE("Dynamic graph: addVertex by moving the given vertex data")
 {
     using Graph = simple_undirected_graph::DynamicGraph<std::string>;
     Graph graph;
@@ -69,7 +69,7 @@ TEST_CASE("addVertex by moving the given vertex data")
     CHECK(graph.vertexData(id) == "original string");
 }
 
-TEST_CASE("emplaceVertex by constructing its data directly from the supplied arguments")
+TEST_CASE("Dynamic graph: emplaceVertex by constructing its data directly from the supplied arguments")
 {
     struct VertexProperties
     {
@@ -90,7 +90,7 @@ TEST_CASE("emplaceVertex by constructing its data directly from the supplied arg
     CHECK(graph.vertexData(id).name == "vertex uno");
 }
 
-TEST_CASE("addVertex supports move-only vertex data")
+TEST_CASE("Dynamic graph: addVertex supports move-only vertex data")
 {
     using Graph = simple_undirected_graph::DynamicGraph<std::unique_ptr<int>>;
     Graph graph;
@@ -108,7 +108,7 @@ TEST_CASE("addVertex supports move-only vertex data")
     CHECK(*graph.vertexData(id) == 5);
 }
 
-TEST_CASE("emplaceVertex supports move-only vertex data")
+TEST_CASE("Dynamic graph: emplaceVertex supports move-only vertex data")
 {
     using Graph = simple_undirected_graph::DynamicGraph<std::unique_ptr<int>>;
     Graph graph;
@@ -123,7 +123,7 @@ TEST_CASE("emplaceVertex supports move-only vertex data")
  * existence and count
  */
 
-TEST_CASE("vertexExists correctly identifies existing vertices")
+TEST_CASE("Dynamic graph: vertexExists correctly identifies existing vertices")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
 
@@ -150,7 +150,7 @@ TEST_CASE("vertexExists correctly identifies existing vertices")
     CHECK_FALSE(graphB.vertexExists(idA2));
 }
 
-TEST_CASE("vertexCount tracks the number of existing vertices")
+TEST_CASE("Dynamic graph: vertexCount tracks the number of existing vertices")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -174,7 +174,7 @@ TEST_CASE("vertexCount tracks the number of existing vertices")
  * properties
  */
 
-TEST_CASE("vertexData returns stored vertex properties")
+TEST_CASE("Dynamic graph: vertexData returns stored vertex properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<double>;
     Graph graph;
@@ -185,7 +185,7 @@ TEST_CASE("vertexData returns stored vertex properties")
     CHECK(graph.vertexData(id) == 20.0);
 }
 
-TEST_CASE("vertexData allows modifying vertex properties")
+TEST_CASE("Dynamic graph: vertexData allows modifying vertex properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<double>;
     Graph graph;
@@ -198,7 +198,7 @@ TEST_CASE("vertexData allows modifying vertex properties")
     CHECK(graph.vertexData(id) == 30.0);
 }
 
-TEST_CASE("vertexData allows reading properties from a const graph")
+TEST_CASE("Dynamic graph: vertexData allows reading properties from a const graph")
 {
     using Graph = simple_undirected_graph::DynamicGraph<double>;
     Graph graph;
@@ -211,7 +211,7 @@ TEST_CASE("vertexData allows reading properties from a const graph")
     CHECK(constGraph.vertexData(id) == 20.0);
 }
 
-TEST_CASE("vertexData throws for an invalid vertex ID")
+TEST_CASE("Dynamic graph: vertexData throws for an invalid vertex ID")
 {
     using Graph = simple_undirected_graph::DynamicGraph<int>;
     Graph graph;
@@ -241,7 +241,7 @@ TEST_CASE("vertexData throws for an invalid vertex ID")
     }
 }
 
-TEST_CASE("emplaceVertex default-initializes vertex properties")
+TEST_CASE("Dynamic graph: emplaceVertex default-initializes vertex properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<int>;
     Graph graph;
@@ -256,7 +256,7 @@ TEST_CASE("emplaceVertex default-initializes vertex properties")
  * removal and reuse
  */
 
-TEST_CASE("removeVertex removes a vertex without affecting other vertices")
+TEST_CASE("Dynamic graph: removeVertex removes a vertex without affecting other vertices")
 {
     using Graph = simple_undirected_graph::DynamicGraph<int>;
     Graph graph;
@@ -276,7 +276,7 @@ TEST_CASE("removeVertex removes a vertex without affecting other vertices")
     CHECK(graph.vertexData(id3) == 3);
 }
 
-TEST_CASE("removeVertex returns false for invalid vertex IDs")
+TEST_CASE("Dynamic graph: removeVertex returns false for invalid vertex IDs")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -304,7 +304,7 @@ TEST_CASE("removeVertex returns false for invalid vertex IDs")
     }
 }
 
-TEST_CASE("removed vertex IDs remain invalid after adding new vertices")
+TEST_CASE("Dynamic graph: removed vertex IDs remain invalid after adding new vertices")
 {
     using Graph = simple_undirected_graph::DynamicGraph<int>;
     Graph graph;
@@ -324,7 +324,7 @@ TEST_CASE("removed vertex IDs remain invalid after adding new vertices")
     CHECK(graph.vertexCount() == 1);
 }
 
-TEST_CASE("removeVertex supports removing multiple vertices in different positions")
+TEST_CASE("Dynamic graph: removeVertex supports removing multiple vertices in different positions")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -347,7 +347,7 @@ TEST_CASE("removeVertex supports removing multiple vertices in different positio
     CHECK(graph.vertexCount() == 0);
 }
 
-TEST_CASE("removeVertex removes incident edges without affecting unrelated edges")
+TEST_CASE("Dynamic graph: removeVertex removes incident edges without affecting unrelated edges")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;

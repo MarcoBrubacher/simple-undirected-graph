@@ -47,7 +47,7 @@ static_assert(std::is_move_assignable_v<MoveOnlyGraph>, "a graph with move-only 
  * copy construction
  */
 
-TEST_CASE("copy constructor copies an empty graph")
+TEST_CASE("Dynamic graph: copy constructor copies an empty graph")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph og;
@@ -59,7 +59,7 @@ TEST_CASE("copy constructor copies an empty graph")
     CHECK(copy.edgeCount() == 0);
 }
 
-TEST_CASE("copy constructor copies graph, vertex and edge properties")
+TEST_CASE("Dynamic graph: copy constructor copies graph, vertex and edge properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<std::string, std::string, int>;
     Graph og{1};
@@ -99,7 +99,7 @@ TEST_CASE("copy constructor copies graph, vertex and edge properties")
     CHECK(copy.edgeData(edges[0]) == "edge ab");
 }
 
-TEST_CASE("copy constructor preserves topology with new graph-specific IDs")
+TEST_CASE("Dynamic graph: copy constructor preserves topology with new graph-specific IDs")
 {
     using Graph = simple_undirected_graph::DynamicGraph<int>;
     Graph og;
@@ -166,7 +166,7 @@ TEST_CASE("copy constructor preserves topology with new graph-specific IDs")
     CHECK_FALSE(copy.edgeExists(bc.first));
 }
 
-TEST_CASE("copy constructor creates an independent graph")
+TEST_CASE("Dynamic graph: copy constructor creates an independent graph")
 {
     using Graph = simple_undirected_graph::DynamicGraph<int, int, std::string>;
     Graph og{"the og"};
@@ -207,7 +207,7 @@ TEST_CASE("copy constructor creates an independent graph")
  * copy assignment
  */
 
-TEST_CASE("copy assignment replaces contents and invalidates old IDs")
+TEST_CASE("Dynamic graph: copy assignment replaces contents and invalidates old IDs")
 {
     using Graph = simple_undirected_graph::DynamicGraph<int, int, std::string>;
     Graph src{"src"};
@@ -262,7 +262,7 @@ TEST_CASE("copy assignment replaces contents and invalidates old IDs")
     CHECK(src.edgeExists(ab.first));
 }
 
-TEST_CASE("copy assignment creates an independent graph")
+TEST_CASE("Dynamic graph: copy assignment creates an independent graph")
 {
     using Graph = simple_undirected_graph::DynamicGraph<int, int, std::string>;
     Graph src{"original"};
@@ -298,7 +298,7 @@ TEST_CASE("copy assignment creates an independent graph")
     CHECK(target.edgeData(copiedEdge) == 5);
 }
 
-TEST_CASE("copy assignment handles self-assignment")
+TEST_CASE("Dynamic graph: copy assignment handles self-assignment")
 {
     using Graph = simple_undirected_graph::DynamicGraph<int, int, int>;
     Graph graph{1};
@@ -327,7 +327,7 @@ TEST_CASE("copy assignment handles self-assignment")
  * move construction
  */
 
-TEST_CASE("move constructor transfers contents and preserves IDs")
+TEST_CASE("Dynamic graph: move constructor transfers contents and preserves IDs")
 {
     using Graph = simple_undirected_graph::DynamicGraph<std::string, std::string, std::string>;
     Graph src{"graph"};
@@ -350,7 +350,7 @@ TEST_CASE("move constructor transfers contents and preserves IDs")
     CHECK(moved.hasEdge(a, b));
 }
 
-TEST_CASE("move constructor leaves the source empty and reusable")
+TEST_CASE("Dynamic graph: move constructor leaves the source empty and reusable")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph src;
@@ -384,7 +384,7 @@ TEST_CASE("move constructor leaves the source empty and reusable")
  * move assignment
  */
 
-TEST_CASE("move assignment replaces contents and preserves transferred IDs")
+TEST_CASE("Dynamic graph: move assignment replaces contents and preserves transferred IDs")
 {
     using Graph = simple_undirected_graph::DynamicGraph<std::string, std::string, std::string>;
     Graph src{"src"};
@@ -418,7 +418,7 @@ TEST_CASE("move assignment replaces contents and preserves transferred IDs")
     CHECK_FALSE(target.edgeExists(oldAB.first));
 }
 
-TEST_CASE("move assignment leaves the source empty and reusable")
+TEST_CASE("Dynamic graph: move assignment leaves the source empty and reusable")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph src;
@@ -447,7 +447,7 @@ TEST_CASE("move assignment leaves the source empty and reusable")
     CHECK_FALSE(src.edgeExists(ab.first));
 }
 
-TEST_CASE("move assignment handles self-assignment")
+TEST_CASE("Dynamic graph: move assignment handles self-assignment")
 {
     using Graph = simple_undirected_graph::DynamicGraph<int, int, int>;
     Graph graph{9};
@@ -477,7 +477,7 @@ TEST_CASE("move assignment handles self-assignment")
  * move-only properties
  */
 
-TEST_CASE("move constructor supports move-only properties")
+TEST_CASE("Dynamic graph: move constructor supports move-only properties")
 {
     using Graph = MoveOnlyGraph;
     Graph src{std::make_unique<int>(1)};
@@ -503,7 +503,7 @@ TEST_CASE("move constructor supports move-only properties")
     CHECK(*moved.edgeData(ab.first) == 4);
 }
 
-TEST_CASE("move assignment supports move-only properties")
+TEST_CASE("Dynamic graph: move assignment supports move-only properties")
 {
     using Graph = MoveOnlyGraph;
     Graph src{std::make_unique<int>(1)};

@@ -23,7 +23,7 @@ static_assert(std::same_as<decltype(std::declval<DefaultGraph &>().adjacency(std
  * degree
  */
 
-TEST_CASE("isolated vertices have degree zero")
+TEST_CASE("Dynamic graph: isolated vertices have degree zero")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -35,7 +35,7 @@ TEST_CASE("isolated vertices have degree zero")
     CHECK(graph.degree(b) == 0);
 }
 
-TEST_CASE("degree keeps track of the number of incident edges")
+TEST_CASE("Dynamic graph: degree keeps track of the number of incident edges")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -69,7 +69,7 @@ TEST_CASE("degree keeps track of the number of incident edges")
  * adjacency
  */
 
-TEST_CASE("adjacency stores the neighbor and edge ID at both endpoints")
+TEST_CASE("Dynamic graph: adjacency stores the neighbor and edge ID at both endpoints")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -92,7 +92,7 @@ TEST_CASE("adjacency stores the neighbor and edge ID at both endpoints")
     CHECK(adjacentB[0].edge == ab.first);
 }
 
-TEST_CASE("adjacency identifies all neighbors regardless of their order")
+TEST_CASE("Dynamic graph: adjacency identifies all neighbors regardless of their order")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -135,7 +135,7 @@ TEST_CASE("adjacency identifies all neighbors regardless of their order")
     CHECK(foundD);
 }
 
-TEST_CASE("adjacency can be read from a const graph")
+TEST_CASE("Dynamic graph: adjacency can be read from a const graph")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -154,7 +154,7 @@ TEST_CASE("adjacency can be read from a const graph")
     CHECK(neighbors[0].edge == ab.first);
 }
 
-TEST_CASE("adding a duplicate edge does not duplicate adjacency entries")
+TEST_CASE("Dynamic graph: adding a duplicate edge does not duplicate adjacency entries")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -184,7 +184,7 @@ TEST_CASE("adding a duplicate edge does not duplicate adjacency entries")
  * removal and updates
  */
 
-TEST_CASE("removeEdge updates adjacency at both endpoints")
+TEST_CASE("Dynamic graph: removeEdge updates adjacency at both endpoints")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -215,7 +215,7 @@ TEST_CASE("removeEdge updates adjacency at both endpoints")
     CHECK(graph.degree(c) == 2);
 }
 
-TEST_CASE("removing edges preserves adjacency after reordering")
+TEST_CASE("Dynamic graph: removing edges preserves adjacency after reordering")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -255,7 +255,7 @@ TEST_CASE("removing edges preserves adjacency after reordering")
     CHECK(graph.degree(d) == 0);
 }
 
-TEST_CASE("removeVertex updates adjacency of its former neighbors")
+TEST_CASE("Dynamic graph: removeVertex updates adjacency of its former neighbors")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -290,7 +290,7 @@ TEST_CASE("removeVertex updates adjacency of its former neighbors")
     CHECK(graph.degree(d) == 0);
 }
 
-TEST_CASE("reusing a vertex slot does not restore stale adjacency entries")
+TEST_CASE("Dynamic graph: reusing a vertex slot does not restore stale adjacency entries")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -339,7 +339,7 @@ TEST_CASE("reusing a vertex slot does not restore stale adjacency entries")
  * invalid operations
  */
 
-TEST_CASE("degree throws for invalid vertex IDs")
+TEST_CASE("Dynamic graph: degree throws for invalid vertex IDs")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -361,7 +361,7 @@ TEST_CASE("degree throws for invalid vertex IDs")
     }
 }
 
-TEST_CASE("adjacency throws for invalid vertex IDs")
+TEST_CASE("Dynamic graph: adjacency throws for invalid vertex IDs")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;

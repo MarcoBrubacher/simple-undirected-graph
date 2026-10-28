@@ -22,7 +22,7 @@ static_assert(noexcept(std::declval<const DefaultGraph &>().edges()), "edges() m
  * empty ranges
  */
 
-TEST_CASE("vertices and edges return empty ranges for an empty graph")
+TEST_CASE("Dynamic graph: vertices and edges return empty ranges for an empty graph")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -35,7 +35,7 @@ TEST_CASE("vertices and edges return empty ranges for an empty graph")
  * vertex iteration
  */
 
-TEST_CASE("vertices returns all existing vertex IDs regardless of order")
+TEST_CASE("Dynamic graph: vertices returns all existing vertex IDs regardless of order")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -72,7 +72,7 @@ TEST_CASE("vertices returns all existing vertex IDs regardless of order")
     CHECK(foundC);
 }
 
-TEST_CASE("vertices excludes removed IDs and includes newly added vertices")
+TEST_CASE("Dynamic graph: vertices excludes removed IDs and includes newly added vertices")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -118,7 +118,7 @@ TEST_CASE("vertices excludes removed IDs and includes newly added vertices")
  * edge iteration
  */
 
-TEST_CASE("edges returns all existing edge IDs regardless of order")
+TEST_CASE("Dynamic graph: edges returns all existing edge IDs regardless of order")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -164,7 +164,7 @@ TEST_CASE("edges returns all existing edge IDs regardless of order")
     CHECK(foundCD);
 }
 
-TEST_CASE("edges excludes removed IDs and includes newly added edges")
+TEST_CASE("Dynamic graph: edges excludes removed IDs and includes newly added edges")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -220,7 +220,7 @@ TEST_CASE("edges excludes removed IDs and includes newly added edges")
  * const iteration and clear
  */
 
-TEST_CASE("vertices and edges can be iterated from a const graph")
+TEST_CASE("Dynamic graph: vertices and edges can be iterated from a const graph")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -244,7 +244,7 @@ TEST_CASE("vertices and edges can be iterated from a const graph")
     CHECK(edgeIds[0] == ab.first);
 }
 
-TEST_CASE("vertices and edges return empty ranges after clear")
+TEST_CASE("Dynamic graph: vertices and edges return empty ranges after clear")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;

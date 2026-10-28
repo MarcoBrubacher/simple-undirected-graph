@@ -12,6 +12,11 @@ set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
     dynamic_graph/test_ids.cpp
     dynamic_graph/test_exception_safety.cpp
     dynamic_graph/test_copy_move.cpp
+
+    csr_graph/test_graph.cpp
+    csr_graph/test_csr_format.cpp
+    csr_graph/test_adjacency.cpp
+    csr_graph/test_copy_move.cpp
 )
 
 add_executable(

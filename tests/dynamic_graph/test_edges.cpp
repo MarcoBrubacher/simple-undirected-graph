@@ -27,7 +27,7 @@ static_assert(std::same_as<decltype(std::declval<DefaultGraph &>().addEdge(std::
  * edge creation
  */
 
-TEST_CASE("addEdge without properties")
+TEST_CASE("Dynamic graph: addEdge without properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -42,7 +42,7 @@ TEST_CASE("addEdge without properties")
     CHECK(graph.edgeExists(ab.first));
 }
 
-TEST_CASE("addEdge by copying the given edge data")
+TEST_CASE("Dynamic graph: addEdge by copying the given edge data")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, std::string>;
     Graph graph;
@@ -62,7 +62,7 @@ TEST_CASE("addEdge by copying the given edge data")
     CHECK(graph.edgeData(ab.first) == "original string");
 }
 
-TEST_CASE("addEdge by moving the given edge data")
+TEST_CASE("Dynamic graph: addEdge by moving the given edge data")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, std::string>;
     Graph graph;
@@ -81,7 +81,7 @@ TEST_CASE("addEdge by moving the given edge data")
     CHECK(graph.edgeData(ab.first) == "original string");
 }
 
-TEST_CASE("emplaceEdge by constructing its data directly from the supplied arguments")
+TEST_CASE("Dynamic graph: emplaceEdge by constructing its data directly from the supplied arguments")
 {
     struct EdgeProperties
     {
@@ -104,7 +104,7 @@ TEST_CASE("emplaceEdge by constructing its data directly from the supplied argum
     CHECK(graph.edgeData(ab.first).name == "edge uno");
 }
 
-TEST_CASE("addEdge supports move-only edge data")
+TEST_CASE("Dynamic graph: addEdge supports move-only edge data")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, std::unique_ptr<int>>;
     Graph graph;
@@ -122,7 +122,7 @@ TEST_CASE("addEdge supports move-only edge data")
     CHECK(*graph.edgeData(ab.first) == 5);
 }
 
-TEST_CASE("emplaceEdge supports move-only edge data")
+TEST_CASE("Dynamic graph: emplaceEdge supports move-only edge data")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, std::unique_ptr<int>>;
     Graph graph;
@@ -142,7 +142,7 @@ TEST_CASE("emplaceEdge supports move-only edge data")
  * existence and count
  */
 
-TEST_CASE("edgeExists correctly identifies existing edges")
+TEST_CASE("Dynamic graph: edgeExists correctly identifies existing edges")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graphA;
@@ -177,7 +177,7 @@ TEST_CASE("edgeExists correctly identifies existing edges")
     CHECK_FALSE(graphB.edgeExists(bc.first));
 }
 
-TEST_CASE("edgeCount tracks the number of existing edges")
+TEST_CASE("Dynamic graph: edgeCount tracks the number of existing edges")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -206,7 +206,7 @@ TEST_CASE("edgeCount tracks the number of existing edges")
  * edge properties
  */
 
-TEST_CASE("edgeData returns stored edge properties")
+TEST_CASE("Dynamic graph: edgeData returns stored edge properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, double>;
     Graph graph;
@@ -221,7 +221,7 @@ TEST_CASE("edgeData returns stored edge properties")
     CHECK(graph.edgeData(ab.first) == 20.0);
 }
 
-TEST_CASE("edgeData allows modifying edge properties")
+TEST_CASE("Dynamic graph: edgeData allows modifying edge properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, double>;
     Graph graph;
@@ -238,7 +238,7 @@ TEST_CASE("edgeData allows modifying edge properties")
     CHECK(graph.edgeData(ab.first) == 30.0);
 }
 
-TEST_CASE("edgeData allows reading properties from a const graph")
+TEST_CASE("Dynamic graph: edgeData allows reading properties from a const graph")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, double>;
     Graph graph;
@@ -254,7 +254,7 @@ TEST_CASE("edgeData allows reading properties from a const graph")
     CHECK(constGraph.edgeData(ab.first) == 20.0);
 }
 
-TEST_CASE("edgeData throws for an invalid edge ID")
+TEST_CASE("Dynamic graph: edgeData throws for an invalid edge ID")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, int>;
     Graph graph;
@@ -292,7 +292,7 @@ TEST_CASE("edgeData throws for an invalid edge ID")
     }
 }
 
-TEST_CASE("emplaceEdge value-initializes edge properties")
+TEST_CASE("Dynamic graph: emplaceEdge value-initializes edge properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, int>;
     Graph graph;
@@ -310,7 +310,7 @@ TEST_CASE("emplaceEdge value-initializes edge properties")
  * edge lookup and endpoints
  */
 
-TEST_CASE("hasEdge identifies existing connections regardless of endpoint order")
+TEST_CASE("Dynamic graph: hasEdge identifies existing connections regardless of endpoint order")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -332,7 +332,7 @@ TEST_CASE("hasEdge identifies existing connections regardless of endpoint order"
     CHECK_FALSE(graph.hasEdge(a, b));
 }
 
-TEST_CASE("findEdgeId finds edges regardless of endpoint order")
+TEST_CASE("Dynamic graph: findEdgeId finds edges regardless of endpoint order")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -358,7 +358,7 @@ TEST_CASE("findEdgeId finds edges regardless of endpoint order")
     CHECK_FALSE(graph.findEdgeId(a, b).has_value());
 }
 
-TEST_CASE("endpoints returns both vertices of an edge")
+TEST_CASE("Dynamic graph: endpoints returns both vertices of an edge")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -378,7 +378,7 @@ TEST_CASE("endpoints returns both vertices of an edge")
  * removal and reuse
  */
 
-TEST_CASE("removeEdge removes only the selected edge and preserves vertices")
+TEST_CASE("Dynamic graph: removeEdge removes only the selected edge and preserves vertices")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -408,7 +408,7 @@ TEST_CASE("removeEdge removes only the selected edge and preserves vertices")
     CHECK(graph.vertexExists(d));
 }
 
-TEST_CASE("removeEdge returns false for invalid edge IDs")
+TEST_CASE("Dynamic graph: removeEdge returns false for invalid edge IDs")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -442,7 +442,7 @@ TEST_CASE("removeEdge returns false for invalid edge IDs")
     }
 }
 
-TEST_CASE("removed edge IDs remain invalid after adding new edges")
+TEST_CASE("Dynamic graph: removed edge IDs remain invalid after adding new edges")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, int>;
     Graph graph;
@@ -472,7 +472,7 @@ TEST_CASE("removed edge IDs remain invalid after adding new edges")
  * invalid operations
  */
 
-TEST_CASE("addEdge and emplaceEdge reject self-loops")
+TEST_CASE("Dynamic graph: addEdge and emplaceEdge reject self-loops")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -484,7 +484,7 @@ TEST_CASE("addEdge and emplaceEdge reject self-loops")
     CHECK(graph.edgeCount() == 0);
 }
 
-TEST_CASE("addEdge and emplaceEdge reject invalid vertices")
+TEST_CASE("Dynamic graph: addEdge and emplaceEdge reject invalid vertices")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -509,7 +509,7 @@ TEST_CASE("addEdge and emplaceEdge reject invalid vertices")
     CHECK(graph.edgeCount() == 0);
 }
 
-TEST_CASE("hasEdge and findEdgeId reject invalid vertices")
+TEST_CASE("Dynamic graph: hasEdge and findEdgeId reject invalid vertices")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -535,7 +535,7 @@ TEST_CASE("hasEdge and findEdgeId reject invalid vertices")
     }
 }
 
-TEST_CASE("endpoints throws for an invalid edge ID")
+TEST_CASE("Dynamic graph: endpoints throws for an invalid edge ID")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -565,7 +565,7 @@ TEST_CASE("endpoints throws for an invalid edge ID")
     }
 }
 
-TEST_CASE("addEdge does not create duplicate edges")
+TEST_CASE("Dynamic graph: addEdge does not create duplicate edges")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -588,7 +588,7 @@ TEST_CASE("addEdge does not create duplicate edges")
     CHECK(graph.edgeCount() == 1);
 }
 
-TEST_CASE("duplicate edge insertion preserves existing edge properties")
+TEST_CASE("Dynamic graph: duplicate edge insertion preserves existing edge properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, std::string>;
     Graph graph;

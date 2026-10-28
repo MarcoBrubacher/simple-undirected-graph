@@ -26,7 +26,7 @@ static_assert(noexcept(std::declval<const defaultGraph &>().graphData()), "graph
  *  graph construction tests
  */
 
-TEST_CASE("default-constructed graph is empty")
+TEST_CASE("Dynamic graph: default-constructed graph is empty")
 {
     simple_undirected_graph::DynamicGraph<> graph;
 
@@ -39,7 +39,7 @@ TEST_CASE("default-constructed graph is empty")
  *  graph data tests
  */
 
-TEST_CASE("graph constructor stores graph data")
+TEST_CASE("Dynamic graph: graph constructor stores graph data")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, simple_undirected_graph::NoProperties, std::string>;
     const Graph graph("graph property");
@@ -47,7 +47,7 @@ TEST_CASE("graph constructor stores graph data")
     CHECK(graph.graphData() == "graph property");
 }
 
-TEST_CASE("graph data can be modified through a non-const graph")
+TEST_CASE("Dynamic graph: graph data can be modified through a non-const graph")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, simple_undirected_graph::NoProperties, std::string>;
     Graph graph("graph property");
@@ -57,7 +57,7 @@ TEST_CASE("graph data can be modified through a non-const graph")
     CHECK(graph.graphData() == "new graph property");
 }
 
-TEST_CASE("default constructor initializes graph properties")
+TEST_CASE("Dynamic graph: default constructor initializes graph properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, simple_undirected_graph::NoProperties, int>;
     Graph graph;
@@ -65,7 +65,7 @@ TEST_CASE("default constructor initializes graph properties")
     CHECK(graph.graphData() == 0);
 }
 
-TEST_CASE("clearing a graph does not change graph properties")
+TEST_CASE("Dynamic graph: clearing a graph does not change graph properties")
 {
     using Graph = simple_undirected_graph::DynamicGraph<simple_undirected_graph::NoProperties, simple_undirected_graph::NoProperties, double>;
 
@@ -84,7 +84,7 @@ TEST_CASE("clearing a graph does not change graph properties")
  *  graph state tests
  */
 
-TEST_CASE("adding vertices makes the graph non-empty")
+TEST_CASE("Dynamic graph: adding vertices makes the graph non-empty")
 {
     simple_undirected_graph::DynamicGraph<> graph;
     graph.addVertex();
@@ -93,7 +93,7 @@ TEST_CASE("adding vertices makes the graph non-empty")
     CHECK(graph.vertexCount() == 1);
 }
 
-TEST_CASE("clearing an empty graph leaves it empty")
+TEST_CASE("Dynamic graph: clearing an empty graph leaves it empty")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
@@ -107,7 +107,7 @@ TEST_CASE("clearing an empty graph leaves it empty")
     CHECK(graph.edgeCount() == 0);
 }
 
-TEST_CASE("clear resets the graph")
+TEST_CASE("Dynamic graph: clear resets the graph")
 {
     using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
