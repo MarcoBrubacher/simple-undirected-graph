@@ -48,18 +48,27 @@ namespace simple_undirected_graph
         // graph operations //
 
         /**
-         * constructs a graph from precomputed CSR arrays
-         *
-         * ensures every edge connects two different vertices and appears in both directions
-         * rejects invalid indices and duplicate edges
-         * @throws std::invalid_argument if the input is invalid or exceeds the Index range
+         * checks whether the supplied arrays represent a valid simple undirected CSR graph
+         * @return true if all CSR invariants are satisfied, false otherwise
          */
-        [[nodiscard]] static CSRGraph fromCSRFormat(std::vector<VertexData> vertexData,
-                                                    std::vector<EdgeData> edgeData,
-                                                    std::vector<std::size_t> offsets,
-                                                    std::vector<Index> neighbors,
-                                                    std::vector<Index> edgeIndices,
-                                                    GraphData graphData);
+        [[nodiscard]] static bool isValidCSRFormat(std::size_t vertexCount,
+                                                   std::size_t edgeCount,
+                                                   std::span<const std::size_t> offsets,
+                                                   std::span<const Index> neighbors,
+                                                   std::span<const Index> edgeIndices);
+
+        /**
+         * constructs a graph from precomputed CSR arrays without validation
+         *
+         * @pre all CSR invariants must be satisfied and indices must fit within Index
+         * @warning invalid input may cause undefined behavior during graph operations
+         */
+        [[nodiscard]] static CSRGraph fromValidCSRFormat(GraphData graphData,
+                                                         std::vector<VertexData> vertexData,
+                                                         std::vector<EdgeData> edgeData,
+                                                         std::vector<std::size_t> offsets,
+                                                         std::vector<Index> neighbors,
+                                                         std::vector<Index> edgeIndices);
 
         [[nodiscard]] GraphData &graphData() noexcept;
         [[nodiscard]] const GraphData &graphData() const noexcept;
@@ -80,19 +89,19 @@ namespace simple_undirected_graph
          * returns the number of neighbors of a vertex
          * @pre vertex < vertexCount()
          */
-        [[nodiscard]] std::size_t degree(VertexId vertex) const noexcept;
+        [[nodiscard]] std::size_t degree(VertexId id) const noexcept;
 
         /**
          * returns the neighboring vertex indices
          * @pre vertex < vertexCount()
          */
-        [[nodiscard]] std::span<const Index> neighbors(VertexId vertex) const noexcept;
+        [[nodiscard]] std::span<const Index> neighbors(VertexId id) const noexcept;
 
         /**
          * returns the edge indices corresponding to neighbors()
          * @pre vertex < vertexCount()
          */
-        [[nodiscard]] std::span<const Index> incidentEdgeIndices(VertexId vertex) const noexcept;
+        [[nodiscard]] std::span<const Index> incidentEdgeIndices(VertexId id) const noexcept;
 
         // Access one vertex data
         [[nodiscard]] VertexData &vertexData(VertexId id) noexcept;
@@ -148,6 +157,14 @@ namespace simple_undirected_graph
         [[nodiscard]] std::span<const Index> adjacencyEdgeIndices() const noexcept;
 
     private:
+        // used by fromValidCSRFormat to initialize CSR arrays directly, which avoids constructing an empty graph first and enables guaranteed copy elision on return
+        CSRGraph(GraphData &&graphData,
+                 std::vector<VertexData> &&vertexData,
+                 std::vector<EdgeData> &&edgeData,
+                 std::vector<std::size_t> &&offsets,
+                 std::vector<Index> &&neighbors,
+                 std::vector<Index> &&edgeIndices);
+
         GraphData graphData_{};
         std::vector<VertexData> vertexData_;
         std::vector<EdgeData> edgeData_;

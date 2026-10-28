@@ -1,5 +1,7 @@
 set(SIMPLE_UNDIRECTED_GRAPH_EXAMPLE_SOURCES
     csr_graph/01_graph_creation.cpp
+    csr_graph/02_graph_traversal.cpp
+    csr_graph/03_graph_properties.cpp
 
     dynamic_graph/01_graph_creation.cpp
     dynamic_graph/02_vertex_operations.cpp
@@ -8,6 +10,9 @@ set(SIMPLE_UNDIRECTED_GRAPH_EXAMPLE_SOURCES
     dynamic_graph/05_graph_copy_move.cpp
     dynamic_graph/06_iteration.cpp
     dynamic_graph/07_id_hashing.cpp
+
+    graph_conversion/01_dynamic_to_csr.cpp
+    graph_conversion/02_csr_to_dynamic.cpp
 )
 
 foreach(EXAMPLE_SOURCE IN LISTS SIMPLE_UNDIRECTED_GRAPH_EXAMPLE_SOURCES)
