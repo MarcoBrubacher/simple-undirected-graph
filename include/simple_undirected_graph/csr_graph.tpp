@@ -268,4 +268,91 @@ namespace simple_undirected_graph
         return std::span<const VertexData>(vertexData_);
     }
 
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    bool CSRGraph<VertexData, EdgeData, GraphData>::edgeExists(EdgeId id) const noexcept
+    {
+        return id < edgeData_.size();
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::size_t CSRGraph<VertexData, EdgeData, GraphData>::edgeCount() const noexcept
+    {
+        return edgeData_.size();
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::optional<typename CSRGraph<VertexData, EdgeData, GraphData>::EdgeId> CSRGraph<VertexData, EdgeData, GraphData>::findEdgeId(VertexId u, VertexId v) const noexcept
+    {
+        if (u == v)
+        {
+            return std::nullopt;
+        }
+
+        if (degree(u) > degree(v))
+        {
+            std::swap(u, v);
+        }
+
+        for (std::size_t i = offsets_[u]; i < offsets_[u + 1]; ++i)
+        {
+            if (neighbors_[i] == v)
+            {
+                return edgeIndices_[i];
+            }
+        }
+        return std::nullopt;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    bool CSRGraph<VertexData, EdgeData, GraphData>::hasEdge(VertexId u, VertexId v) const noexcept
+    {
+        return findEdgeId(u, v).has_value();
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::vector<std::pair<typename CSRGraph<VertexData, EdgeData, GraphData>::VertexId, typename CSRGraph<VertexData, EdgeData, GraphData>::VertexId>> CSRGraph<VertexData, EdgeData, GraphData>::reconstructEdgeEndpoints() const
+    {
+
+        std::vector<std::pair<VertexId, VertexId>> endpoints(edgeCount());
+
+        //  size_t is used for iteration because vector sizes and CSR offsets uses size_t
+        for (std::size_t u = 0; u < vertexCount(); ++u)
+        {
+            for (std::size_t i = offsets_[u]; i < offsets_[u + 1]; ++i)
+            {
+                const VertexId v = neighbors_[i];
+                const EdgeId e = edgeIndices_[i];
+
+                if (u < v)
+                {
+                    endpoints[e] = {static_cast<VertexId>(u), v};
+                }
+            }
+        }
+        return endpoints;
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    EdgeData &CSRGraph<VertexData, EdgeData, GraphData>::edgeData(EdgeId id) noexcept
+    {
+        return edgeData_[id];
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    const EdgeData &CSRGraph<VertexData, EdgeData, GraphData>::edgeData(EdgeId id) const noexcept
+    {
+        return edgeData_[id];
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::span<EdgeData> CSRGraph<VertexData, EdgeData, GraphData>::edgeData() noexcept
+    {
+        return std::span<EdgeData>(edgeData_);
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::span<const EdgeData> CSRGraph<VertexData, EdgeData, GraphData>::edgeData() const noexcept
+    {
+        return std::span<const EdgeData>(edgeData_);
+    }
 }

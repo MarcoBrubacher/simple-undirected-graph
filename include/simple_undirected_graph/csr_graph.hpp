@@ -77,29 +77,25 @@ namespace simple_undirected_graph
 
         // vertex operations //
 
-        /**
-         * checks whether the ID refers to an existing vertex in this graph
-         * @return false for another graph or an invalid index
-         */
         [[nodiscard]] bool vertexExists(VertexId id) const noexcept;
 
         [[nodiscard]] std::size_t vertexCount() const noexcept;
 
         /**
          * returns the number of neighbors of a vertex
-         * @pre vertex < vertexCount()
+         * @pre id < vertexCount()
          */
         [[nodiscard]] std::size_t degree(VertexId id) const noexcept;
 
         /**
          * returns the neighboring vertex indices
-         * @pre vertex < vertexCount()
+         * @pre id < vertexCount()
          */
         [[nodiscard]] std::span<const Index> neighbors(VertexId id) const noexcept;
 
         /**
          * returns the edge indices corresponding to neighbors()
-         * @pre vertex < vertexCount()
+         * @pre id < vertexCount()
          */
         [[nodiscard]] std::span<const Index> incidentEdgeIndices(VertexId id) const noexcept;
 
@@ -112,17 +108,9 @@ namespace simple_undirected_graph
 
         // edge operations //
 
-        /**
-         * checks whether the ID refers to an existing edge in this graph
-         * @return false for another graph or an invalid index
-         */
         [[nodiscard]] bool edgeExists(EdgeId id) const noexcept;
 
-        /**
-         * checks whether an edge connects two vertices
-         * @pre u < vertexCount() && v < vertexCount()
-         */
-        [[nodiscard]] bool hasEdge(VertexId u, VertexId v) const noexcept;
+        [[nodiscard]] std::size_t edgeCount() const noexcept;
 
         /**
          * finds the edge connecting two vertices
@@ -131,7 +119,17 @@ namespace simple_undirected_graph
          */
         [[nodiscard]] std::optional<EdgeId> findEdgeId(VertexId u, VertexId v) const noexcept;
 
-        [[nodiscard]] std::size_t edgeCount() const noexcept;
+        /**
+         * checks whether an edge connects two vertices
+         * @pre u < vertexCount() && v < vertexCount()
+         */
+        [[nodiscard]] bool hasEdge(VertexId u, VertexId v) const noexcept;
+
+        /**
+         * reconstructs a edge endpoints list for algorithms requiring direct edge-based access, avoids storing endpoints permanently to minimize memory usage
+         * @return endpoint pairs indexed by EdgeId
+         */
+        [[nodiscard]] std::vector<std::pair<VertexId, VertexId>> reconstructEdgeEndpoints() const;
 
         // Access one edge data
         [[nodiscard]] EdgeData &edgeData(EdgeId id) noexcept;
@@ -139,12 +137,6 @@ namespace simple_undirected_graph
         // Access all edges data
         [[nodiscard]] std::span<EdgeData> edgeData() noexcept;
         [[nodiscard]] std::span<const EdgeData> edgeData() const noexcept;
-
-        /**
-         * reconstructs edge endpoints for algorithms requiring direct edge-based access, avoids storing endpoints permanently to minimize memory usage
-         * @return endpoint pairs indexed by EdgeId
-         */
-        [[nodiscard]] std::vector<std::pair<VertexId, VertexId>> reconstructEdgeEndpoints() const;
 
         // direct CSR access //
 
