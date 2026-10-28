@@ -355,4 +355,24 @@ namespace simple_undirected_graph
     {
         return std::span<const EdgeData>(edgeData_);
     }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::span<const std::size_t> CSRGraph<VertexData, EdgeData, GraphData>::offsets() const noexcept
+    {
+        return std::span<const std::size_t>(offsets_);
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::span<const typename CSRGraph<VertexData, EdgeData, GraphData>::Index>
+    CSRGraph<VertexData, EdgeData, GraphData>::neighborIndices() const noexcept
+    {
+        return std::span<const Index>(neighbors_);
+    }
+
+    template <typename VertexData, typename EdgeData, typename GraphData>
+    std::span<const typename CSRGraph<VertexData, EdgeData, GraphData>::Index>
+    CSRGraph<VertexData, EdgeData, GraphData>::adjacencyEdgeIndices() const noexcept
+    {
+        return std::span<const Index>(edgeIndices_);
+    }
 }
