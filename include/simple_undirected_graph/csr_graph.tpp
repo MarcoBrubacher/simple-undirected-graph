@@ -1,7 +1,6 @@
 #include <utility>
 #include <limits>
 #include <stdexcept>
-#include <limits>
 
 namespace simple_undirected_graph
 {
