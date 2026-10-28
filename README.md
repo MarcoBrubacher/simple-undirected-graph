@@ -2,22 +2,16 @@
 
 A small header-only C++20 library for finite simple undirected graphs, with optional data attached to vertices, edges, and the graph itself.
 
-## Graph model
 
-The library represents finite simple undirected graphs:
+## Graph representations
 
-- vertices cannot have self-loops
-- there can be at most one edge between any pair of vertices
-- each undirected edge is represented once
+### DynamicGraph
 
-## Access and traversal
+`DynamicGraph` stores a mutable graph topology. Vertices and edges can be added or removed after construction, while graph, vertex, and edge data remain mutable. 
 
-Vertices and edges are accessed through IDs rather than references into the internal storage. The API supports:
+### CSRGraph
 
-- iteration over existing vertices and edges
-- adjacency access
-- vertex, edge, and graph data
-- edge lookup by endpoints
+`CSRGraph` stores a fixed topology in CSR format. Its topology cannot be modified after construction, but graph, vertex, and edge data remain mutable.
 
 ## Requirements
 
@@ -49,11 +43,9 @@ ctest --test-dir build -C Debug --output-on-failure
 
 ## Current work
 
-- Implement graph I/O for loading graph data from external files, starting with TUDataset
-- Implement a structurally frozen graph representation using CSR, optimized for traversal while allowing vertex, edge, and graph properties to be modified
-- Support loading graph data directly into either mutable `Graph` or CSR-based `FrozenGraph` representations
-- Support freezing existing graphs and converting frozen graphs back into mutable graphs when structural modifications are required
-- Optimize direct CSR construction to avoid unnecessary intermediate graph representations
+- CSR graph tests
+- Implementing conversions between `DynamicGraph` and `CSRGraph`
+- Implement graph I/O for loading graph data from external files, starting with TU Dataset
 
 ## Planned extensions
 
