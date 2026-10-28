@@ -1,7 +1,7 @@
 set(SIMPLE_UNDIRECTED_GRAPH_EXAMPLE_SOURCES
     csr_graph/01_graph_creation.cpp
-    csr_graph/02_graph_traversal.cpp
-    csr_graph/03_graph_properties.cpp
+    csr_graph/02_graph_operations.cpp
+    csr_graph/03_property_changes.cpp
 
     dynamic_graph/01_graph_creation.cpp
     dynamic_graph/02_vertex_operations.cpp

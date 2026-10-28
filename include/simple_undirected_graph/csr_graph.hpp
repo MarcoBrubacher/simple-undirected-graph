@@ -60,6 +60,8 @@ namespace simple_undirected_graph
         /**
          * constructs a graph from precomputed CSR arrays without validation
          *
+         * mainly intended for IO importers and graph converters, but also supports direct construction
+         *
          * @pre all CSR invariants must be satisfied and indices must fit within Index
          * @warning invalid input may cause undefined behavior during graph operations
          */
