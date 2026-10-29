@@ -17,30 +17,24 @@
 
 using DefaultGraph = simple_undirected_graph::DynamicGraph<>;
 
-static_assert(std::copy_constructible<DefaultGraph>, "Graph<> must be copy-constructible");
+static_assert(std::copy_constructible<DefaultGraph>, "DynamicGraph<> must be copy-constructible");
+static_assert(std::is_copy_assignable_v<DefaultGraph>, "DynamicGraph<> must be copy-assignable");
 
-static_assert(std::is_copy_assignable_v<DefaultGraph>, "Graph<> must be copy-assignable");
-
-static_assert(std::move_constructible<DefaultGraph>, "Graph<> must be move-constructible");
-
-static_assert(std::is_move_assignable_v<DefaultGraph>, "Graph<> must be move-assignable");
+static_assert(std::move_constructible<DefaultGraph>, "DynamicGraph<> must be move-constructible");
+static_assert(std::is_move_assignable_v<DefaultGraph>, "DynamicGraph<> must be move-assignable");
 
 static_assert(std::same_as<decltype(std::declval<DefaultGraph &>() = std::declval<const DefaultGraph &>()), DefaultGraph &>, "copy assignment must return Graph&");
-
 static_assert(std::same_as<decltype(std::declval<DefaultGraph &>() = std::declval<DefaultGraph &&>()), DefaultGraph &>, "move assignment must return Graph&");
 
-static_assert(std::is_nothrow_move_constructible_v<DefaultGraph>, "Graph<> move construction must be noexcept");
-
-static_assert(std::is_nothrow_move_assignable_v<DefaultGraph>, "Graph<> move assignment must be noexcept");
+static_assert(std::is_nothrow_move_constructible_v<DefaultGraph>, "DynamicGraph<> move construction must be noexcept");
+static_assert(std::is_nothrow_move_assignable_v<DefaultGraph>, "DynamicGraph<> move assignment must be noexcept");
 
 using MoveOnlyGraph = simple_undirected_graph::DynamicGraph<std::unique_ptr<int>, std::unique_ptr<int>, std::unique_ptr<int>>;
 
 static_assert(!std::copy_constructible<MoveOnlyGraph>, "a graph with move-only properties must not be copy-constructible");
-
 static_assert(!std::is_copy_assignable_v<MoveOnlyGraph>, "a graph with move-only properties must not be copy-assignable");
 
 static_assert(std::move_constructible<MoveOnlyGraph>, "a graph with move-only properties must be move-constructible");
-
 static_assert(std::is_move_assignable_v<MoveOnlyGraph>, "a graph with move-only properties must be move-assignable");
 
 /**
