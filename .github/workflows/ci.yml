@@ -1,0 +1,45 @@
+name: C++ CI
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - os: ubuntu-latest
+            compiler: GCC
+            cxx: g++
+
+          - os: ubuntu-latest
+            compiler: Clang
+            cxx: clang++
+
+          - os: windows-latest
+            compiler: MSVC
+            cxx: cl
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure CMake
+        run: >
+          cmake -S . -B build
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+          -DCMAKE_BUILD_TYPE=Debug
+          -DSIMPLE_UNDIRECTED_GRAPH_BUILD_EXAMPLES=ON
+          -DSIMPLE_UNDIRECTED_GRAPH_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build --config Debug --parallel 2
+
+      - name: Test
+        run: ctest --test-dir build -C Debug --output-on-failure
