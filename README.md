@@ -10,7 +10,7 @@ A small C++20 library for finite simple undirected graphs, with optional data at
 
 ### CSRGraph
 
-`CSRGraph` stores a fixed topology in CSR format. Its topology cannot be modified after construction, but graph, vertex, and edge data remain mutable. It is designed for a more compact storage and efficient graph traversal.
+`CSRGraph` stores a fixed topology in CSR format. Its topology cannot be modified after construction, but graph, vertex, and edge data remain mutable. Compared with `DynamicGraph`, it is designed for more compact storage and more efficient graph traversal.
 
 In addition to the standard CSR arrays, it stores an edge ID for each adjacency entry, linking each vertex-neighbor connection to its corresponding edge. Both adjacency entries of an undirected edge reference the same edge ID, allowing edge properties to be stored only once and accessed directly during traversal.
 
