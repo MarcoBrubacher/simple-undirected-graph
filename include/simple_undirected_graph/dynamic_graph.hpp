@@ -14,6 +14,8 @@
 
 namespace simple_undirected_graph
 {
+    class Conversion;
+
     /**
      * finite simple undirected graph with mutable topology
      *
@@ -43,6 +45,7 @@ namespace simple_undirected_graph
         private:
             friend class DynamicGraph;
             friend struct VertexIdHash;
+            friend class Conversion;
 
             VertexId(std::size_t graphId, std::size_t index, std::size_t generation);
 
@@ -66,6 +69,7 @@ namespace simple_undirected_graph
         private:
             friend class DynamicGraph;
             friend struct EdgeIdHash;
+            friend class Conversion;
 
             EdgeId(std::size_t graphId, std::size_t index, std::size_t generation);
 
@@ -282,6 +286,8 @@ namespace simple_undirected_graph
         [[nodiscard]] std::span<const EdgeId> edges() const noexcept;
 
     private:
+        friend class Conversion;
+
         template <typename... Args>
             requires std::constructible_from<VertexData, Args...>
         VertexId insertVertex(Args &&...args);
