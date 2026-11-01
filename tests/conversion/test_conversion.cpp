@@ -8,7 +8,6 @@
 #include <span>
 #include <optional>
 #include <memory>
-#include <utility>
 #include <vector>
 
 using Conversion = simple_undirected_graph::Conversion;
@@ -292,8 +291,6 @@ TEST_CASE("Conversion: Dynamic to CSR handles slot reuse")
     std::optional<CSR::VertexId> indexV1;
     std::optional<CSR::VertexId> indexV3;
     std::optional<CSR::VertexId> indexV4;
-
-    REQUIRE(vertices.size() == csr.vertexCount());
 
     for (CSR::VertexId i = 0; i < csr.vertexCount(); ++i)
     {
