@@ -1,17 +1,29 @@
 # simple-undirected-graph
 
-A small header-only C++20 library for finite simple undirected graphs, with optional data attached to vertices, edges, and the graph itself.
-
+A small C++20 library for finite simple undirected graphs, with optional data attached to vertices, edges, and the graph itself.
 
 ## Graph representations
 
 ### DynamicGraph
 
-`DynamicGraph` stores a mutable graph topology. Vertices and edges can be added or removed after construction, while graph, vertex, and edge data remain mutable. 
+`DynamicGraph` stores a mutable graph topology. Vertices and edges can be added or removed after construction, while graph, vertex, and edge data remain mutable. It is designed for efficient graph construction and modification.
 
 ### CSRGraph
 
-`CSRGraph` stores a fixed topology in CSR format. Its topology cannot be modified after construction, but graph, vertex, and edge data remain mutable.
+`CSRGraph` stores a fixed topology in CSR format. Its topology cannot be modified after construction, but graph, vertex, and edge data remain mutable. It is designed for a more compact storage and efficient graph traversal.
+
+In addition to the standard CSR arrays, it stores an edge ID for each adjacency entry, linking each vertex-neighbor connection to its corresponding edge. Both adjacency entries of an undirected edge reference the same edge ID, allowing edge properties to be stored only once and accessed directly during traversal.
+
+Edge endpoints are not stored permanently to minimize memory usage. Instead, the `reconstructEdgeEndpoints()` function reconstructs the endpoints of each edge, indexed by its edge ID, when needed for edge-based processing.
+
+## Graph conversion
+
+`Conversion` supports conversion between `DynamicGraph` and `CSRGraph` in both directions.
+
+- `toCSRGraph()` converts a dynamic graph to CSR format.
+- `toDynamicGraph()` converts a CSR graph to a dynamic graph.
+
+Both functions support copy and move semantics. Conversions preserve graph properties.
 
 ## Requirements
 
@@ -43,8 +55,6 @@ ctest --test-dir build -C Debug --output-on-failure
 
 ## Current work
 
-- CSR graph tests
-- Implementing conversions between `DynamicGraph` and `CSRGraph`
 - Implement graph I/O for loading graph data from external files, starting with TU Dataset
 
 ## Planned extensions

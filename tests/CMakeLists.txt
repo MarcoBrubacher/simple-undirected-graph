@@ -17,6 +17,8 @@ set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
     csr_graph/test_csr_format.cpp
     csr_graph/test_adjacency.cpp
     csr_graph/test_copy_move.cpp
+
+    conversion/test_conversion.cpp
 )
 
 add_executable(

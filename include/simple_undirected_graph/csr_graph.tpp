@@ -92,15 +92,10 @@ namespace simple_undirected_graph
         const std::size_t maxIndex = std::numeric_limits<Index>::max();
 
         // storage invariants
-        if (offsets.empty() ||
-            offsets.size() - 1 != vertexCount ||
-            neighbors.size() != edgeIndices.size() ||
-            neighbors.size() % 2 != 0 ||
-            neighbors.size() / 2 != edgeCount ||
-            offsets.front() != 0 ||
-            offsets.back() != neighbors.size() ||
-            vertexCount > maxIndex ||
-            edgeCount > maxIndex)
+        if (offsets.empty() || offsets.size() - 1 != vertexCount ||
+            neighbors.size() != edgeIndices.size() || neighbors.size() % 2 != 0 || neighbors.size() / 2 != edgeCount ||
+            offsets.front() != 0 || offsets.back() != neighbors.size() ||
+            vertexCount > maxIndex || edgeCount > maxIndex)
         {
             return false;
         }
