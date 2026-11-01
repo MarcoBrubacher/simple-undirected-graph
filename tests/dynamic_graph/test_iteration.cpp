@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include <simple_undirected_graph/graph.hpp>
+#include <simple_undirected_graph/dynamic_graph.hpp>
 #include <utility>
 #include <concepts>
 #include <span>
@@ -8,7 +8,7 @@
  * compile time tests
  */
 
-using DefaultGraph = simple_undirected_graph::Graph<>;
+using DefaultGraph = simple_undirected_graph::DynamicGraph<>;
 
 static_assert(std::same_as<decltype(std::declval<const DefaultGraph &>().vertices()), std::span<const DefaultGraph::VertexId>>, "vertices() must return std::span<const VertexId>");
 
@@ -22,9 +22,9 @@ static_assert(noexcept(std::declval<const DefaultGraph &>().edges()), "edges() m
  * empty ranges
  */
 
-TEST_CASE("vertices and edges return empty ranges for an empty graph")
+TEST_CASE("Dynamic graph: vertices and edges return empty ranges for an empty graph")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     CHECK(graph.vertices().empty());
@@ -35,9 +35,9 @@ TEST_CASE("vertices and edges return empty ranges for an empty graph")
  * vertex iteration
  */
 
-TEST_CASE("vertices returns all existing vertex IDs regardless of order")
+TEST_CASE("Dynamic graph: vertices returns all existing vertex IDs regardless of order")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -72,9 +72,9 @@ TEST_CASE("vertices returns all existing vertex IDs regardless of order")
     CHECK(foundC);
 }
 
-TEST_CASE("vertices excludes removed IDs and includes newly added vertices")
+TEST_CASE("Dynamic graph: vertices excludes removed IDs and includes newly added vertices")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -118,9 +118,9 @@ TEST_CASE("vertices excludes removed IDs and includes newly added vertices")
  * edge iteration
  */
 
-TEST_CASE("edges returns all existing edge IDs regardless of order")
+TEST_CASE("Dynamic graph: edges returns all existing edge IDs regardless of order")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -164,9 +164,9 @@ TEST_CASE("edges returns all existing edge IDs regardless of order")
     CHECK(foundCD);
 }
 
-TEST_CASE("edges excludes removed IDs and includes newly added edges")
+TEST_CASE("Dynamic graph: edges excludes removed IDs and includes newly added edges")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -220,9 +220,9 @@ TEST_CASE("edges excludes removed IDs and includes newly added edges")
  * const iteration and clear
  */
 
-TEST_CASE("vertices and edges can be iterated from a const graph")
+TEST_CASE("Dynamic graph: vertices and edges can be iterated from a const graph")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();
@@ -244,9 +244,9 @@ TEST_CASE("vertices and edges can be iterated from a const graph")
     CHECK(edgeIds[0] == ab.first);
 }
 
-TEST_CASE("vertices and edges return empty ranges after clear")
+TEST_CASE("Dynamic graph: vertices and edges return empty ranges after clear")
 {
-    using Graph = simple_undirected_graph::Graph<>;
+    using Graph = simple_undirected_graph::DynamicGraph<>;
     Graph graph;
 
     const Graph::VertexId a = graph.addVertex();

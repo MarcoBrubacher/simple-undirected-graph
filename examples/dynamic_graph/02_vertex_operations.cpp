@@ -1,4 +1,4 @@
-#include <simple_undirected_graph/graph.hpp>
+#include <simple_undirected_graph/dynamic_graph.hpp>
 
 #include <iostream>
 #include <string>
@@ -13,7 +13,7 @@ struct Protein
 
 int main()
 {
-    using Graph = simple_undirected_graph::Graph<Protein>;
+    using Graph = simple_undirected_graph::DynamicGraph<Protein>;
     Graph graph;
 
     Protein tp53{"TP53", 393};
@@ -37,7 +37,7 @@ int main()
     bool removed = graph.removeVertex(mdm2Id);
     std::cout << "MDM2 removed: " << removed << '\n';
 
-    simple_undirected_graph::Graph<> propertylessGraph;
+    simple_undirected_graph::DynamicGraph<> propertylessGraph;
     propertylessGraph.addVertex();
 
     return 0;

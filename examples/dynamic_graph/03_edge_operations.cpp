@@ -1,4 +1,4 @@
-#include <simple_undirected_graph/graph.hpp>
+#include <simple_undirected_graph/dynamic_graph.hpp>
 
 #include <iostream>
 #include <string>
@@ -19,7 +19,7 @@ struct Bond
 
 int main()
 {
-    using Molecule = simple_undirected_graph::Graph<Atom, Bond>;
+    using Molecule = simple_undirected_graph::DynamicGraph<Atom, Bond>;
 
     Molecule propene;
 
@@ -79,9 +79,9 @@ int main()
     bool removed = propene.removeEdge(doubleBondId);
     std::cout << "Double bond removed: " << removed << '\n';
 
-    simple_undirected_graph::Graph<> propertylessGraph;
-    simple_undirected_graph::Graph<>::VertexId vertex1 = propertylessGraph.addVertex();
-    simple_undirected_graph::Graph<>::VertexId vertex2 = propertylessGraph.addVertex();
+    simple_undirected_graph::DynamicGraph<> propertylessGraph;
+    simple_undirected_graph::DynamicGraph<>::VertexId vertex1 = propertylessGraph.addVertex();
+    simple_undirected_graph::DynamicGraph<>::VertexId vertex2 = propertylessGraph.addVertex();
     propertylessGraph.addEdge(vertex1, vertex2);
 
     return 0;

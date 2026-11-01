@@ -1,4 +1,4 @@
-#include <simple_undirected_graph/graph.hpp>
+#include <simple_undirected_graph/dynamic_graph.hpp>
 
 #include <iostream>
 #include <string>
@@ -6,7 +6,7 @@
 
 int main()
 {
-    using Graph = simple_undirected_graph::Graph<std::string>;
+    using Graph = simple_undirected_graph::DynamicGraph<std::string>;
     std::cout << std::boolalpha;
 
     Graph original;

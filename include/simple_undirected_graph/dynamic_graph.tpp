@@ -5,54 +5,54 @@
 namespace simple_undirected_graph
 {
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::VertexId::VertexId(std::size_t graphId, std::size_t index, std::size_t generation) : graphId(graphId),
-                                                                                                                                 index(index),
-                                                                                                                                 generation(generation) {}
+    DynamicGraph<VertexData, EdgeData, GraphData>::VertexId::VertexId(std::size_t graphId, std::size_t index, std::size_t generation) : graphId(graphId),
+                                                                                                                                        index(index),
+                                                                                                                                        generation(generation) {}
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::EdgeId::EdgeId(std::size_t graphId, std::size_t index, std::size_t generation) : graphId(graphId),
-                                                                                                                             index(index),
-                                                                                                                             generation(generation) {}
+    DynamicGraph<VertexData, EdgeData, GraphData>::EdgeId::EdgeId(std::size_t graphId, std::size_t index, std::size_t generation) : graphId(graphId),
+                                                                                                                                    index(index),
+                                                                                                                                    generation(generation) {}
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::size_t Graph<VertexData, EdgeData, GraphData>::VertexIdHash::operator()(const VertexId &id) const noexcept
+    std::size_t DynamicGraph<VertexData, EdgeData, GraphData>::VertexIdHash::operator()(const VertexId &id) const noexcept
     {
         std::size_t seed = 0;
 
-        seed = Graph::combineHash(seed, id.graphId);
-        seed = Graph::combineHash(seed, id.index);
-        seed = Graph::combineHash(seed, id.generation);
+        seed = DynamicGraph::combineHash(seed, id.graphId);
+        seed = DynamicGraph::combineHash(seed, id.index);
+        seed = DynamicGraph::combineHash(seed, id.generation);
 
         return seed;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::size_t Graph<VertexData, EdgeData, GraphData>::EdgeIdHash::operator()(const EdgeId &id) const noexcept
+    std::size_t DynamicGraph<VertexData, EdgeData, GraphData>::EdgeIdHash::operator()(const EdgeId &id) const noexcept
     {
         std::size_t seed = 0;
 
-        seed = Graph::combineHash(seed, id.graphId);
-        seed = Graph::combineHash(seed, id.index);
-        seed = Graph::combineHash(seed, id.generation);
+        seed = DynamicGraph::combineHash(seed, id.graphId);
+        seed = DynamicGraph::combineHash(seed, id.index);
+        seed = DynamicGraph::combineHash(seed, id.generation);
 
         return seed;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::Graph()
+    DynamicGraph<VertexData, EdgeData, GraphData>::DynamicGraph()
         requires std::default_initializable<GraphData>
         : graphId_(nextGraphId_++)
     {
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::Graph(GraphData graphData)
+    DynamicGraph<VertexData, EdgeData, GraphData>::DynamicGraph(GraphData graphData)
         requires std::constructible_from<GraphData, GraphData &&>
         : graphId_(nextGraphId_++), graphData_(std::move(graphData))
     {
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::Graph(const Graph &sourceGraph)
+    DynamicGraph<VertexData, EdgeData, GraphData>::DynamicGraph(const DynamicGraph &sourceGraph)
         requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &>
         : graphId_(nextGraphId_++),
           graphData_(sourceGraph.graphData_),
@@ -107,36 +107,36 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData> &Graph<VertexData, EdgeData, GraphData>::operator=(const Graph &sourceGraph)
+    DynamicGraph<VertexData, EdgeData, GraphData> &DynamicGraph<VertexData, EdgeData, GraphData>::operator=(const DynamicGraph &sourceGraph)
+        requires std::constructible_from<VertexData, const VertexData &> && std::constructible_from<EdgeData, const EdgeData &> && std::constructible_from<GraphData, const GraphData &>
     {
         if (this == &sourceGraph)
         {
             return *this;
         }
 
-        // copy via copy constructor to assign the new graph obj
-        Graph copiedGraph(sourceGraph);
+        DynamicGraph copy(sourceGraph);
 
-        *this = std::move(copiedGraph);
+        *this = std::move(copy);
         return *this;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData>::Graph(Graph &&sourceGraph) noexcept(std::is_nothrow_move_constructible_v<GraphData>) : graphId_(sourceGraph.graphId_),
-                                                                                                                                   graphData_(std::move(sourceGraph.graphData_)),
-                                                                                                                                   vertexSlots_(std::move(sourceGraph.vertexSlots_)),
-                                                                                                                                   edgeSlots_(std::move(sourceGraph.edgeSlots_)),
-                                                                                                                                   freeVertexSlots_(std::move(sourceGraph.freeVertexSlots_)),
-                                                                                                                                   freeEdgeSlots_(std::move(sourceGraph.freeEdgeSlots_)),
-                                                                                                                                   liveVertices_(std::move(sourceGraph.liveVertices_)),
-                                                                                                                                   liveEdges_(std::move(sourceGraph.liveEdges_)),
-                                                                                                                                   edgeLookup_(std::move(sourceGraph.edgeLookup_))
+    DynamicGraph<VertexData, EdgeData, GraphData>::DynamicGraph(DynamicGraph &&sourceGraph) noexcept(std::is_nothrow_move_constructible_v<GraphData>) : graphId_(sourceGraph.graphId_),
+                                                                                                                                                        graphData_(std::move(sourceGraph.graphData_)),
+                                                                                                                                                        vertexSlots_(std::move(sourceGraph.vertexSlots_)),
+                                                                                                                                                        edgeSlots_(std::move(sourceGraph.edgeSlots_)),
+                                                                                                                                                        freeVertexSlots_(std::move(sourceGraph.freeVertexSlots_)),
+                                                                                                                                                        freeEdgeSlots_(std::move(sourceGraph.freeEdgeSlots_)),
+                                                                                                                                                        liveVertices_(std::move(sourceGraph.liveVertices_)),
+                                                                                                                                                        liveEdges_(std::move(sourceGraph.liveEdges_)),
+                                                                                                                                                        edgeLookup_(std::move(sourceGraph.edgeLookup_))
     {
         sourceGraph.clear();
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    Graph<VertexData, EdgeData, GraphData> &Graph<VertexData, EdgeData, GraphData>::operator=(Graph &&sourceGraph) noexcept(std::is_nothrow_move_assignable_v<GraphData>)
+    DynamicGraph<VertexData, EdgeData, GraphData> &DynamicGraph<VertexData, EdgeData, GraphData>::operator=(DynamicGraph &&sourceGraph) noexcept(std::is_nothrow_move_assignable_v<GraphData>)
     {
         if (this == &sourceGraph)
         {
@@ -166,19 +166,19 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    GraphData &Graph<VertexData, EdgeData, GraphData>::graphData() noexcept
+    GraphData &DynamicGraph<VertexData, EdgeData, GraphData>::graphData() noexcept
     {
         return graphData_;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    const GraphData &Graph<VertexData, EdgeData, GraphData>::graphData() const noexcept
+    const GraphData &DynamicGraph<VertexData, EdgeData, GraphData>::graphData() const noexcept
     {
         return graphData_;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    void Graph<VertexData, EdgeData, GraphData>::clear() noexcept
+    void DynamicGraph<VertexData, EdgeData, GraphData>::clear() noexcept
     {
         vertexSlots_.clear();
         edgeSlots_.clear();
@@ -195,28 +195,28 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    bool Graph<VertexData, EdgeData, GraphData>::empty() const noexcept
+    bool DynamicGraph<VertexData, EdgeData, GraphData>::empty() const noexcept
     {
         return liveVertices_.empty();
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    typename Graph<VertexData, EdgeData, GraphData>::VertexId Graph<VertexData, EdgeData, GraphData>::addVertex()
+    typename DynamicGraph<VertexData, EdgeData, GraphData>::VertexId DynamicGraph<VertexData, EdgeData, GraphData>::addVertex()
         requires std::same_as<VertexData, NoProperties>
     {
         return insertVertex();
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    typename Graph<VertexData, EdgeData, GraphData>::VertexId
-    Graph<VertexData, EdgeData, GraphData>::addVertex(const VertexData &vertexData)
+    typename DynamicGraph<VertexData, EdgeData, GraphData>::VertexId
+    DynamicGraph<VertexData, EdgeData, GraphData>::addVertex(const VertexData &vertexData)
     {
         return insertVertex(vertexData);
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    typename Graph<VertexData, EdgeData, GraphData>::VertexId
-    Graph<VertexData, EdgeData, GraphData>::addVertex(VertexData &&vertexData)
+    typename DynamicGraph<VertexData, EdgeData, GraphData>::VertexId
+    DynamicGraph<VertexData, EdgeData, GraphData>::addVertex(VertexData &&vertexData)
     {
         return insertVertex(std::move(vertexData));
     }
@@ -224,13 +224,13 @@ namespace simple_undirected_graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     template <typename... Args>
         requires std::constructible_from<VertexData, Args...>
-    typename Graph<VertexData, EdgeData, GraphData>::VertexId Graph<VertexData, EdgeData, GraphData>::emplaceVertex(Args &&...args)
+    typename DynamicGraph<VertexData, EdgeData, GraphData>::VertexId DynamicGraph<VertexData, EdgeData, GraphData>::emplaceVertex(Args &&...args)
     {
         return insertVertex(std::forward<Args>(args)...);
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    bool Graph<VertexData, EdgeData, GraphData>::removeVertex(VertexId id)
+    bool DynamicGraph<VertexData, EdgeData, GraphData>::removeVertex(VertexId id)
     {
         if (!vertexExists(id))
         {
@@ -262,13 +262,13 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::size_t Graph<VertexData, EdgeData, GraphData>::vertexCount() const noexcept
+    std::size_t DynamicGraph<VertexData, EdgeData, GraphData>::vertexCount() const noexcept
     {
         return liveVertices_.size();
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    bool Graph<VertexData, EdgeData, GraphData>::vertexExists(VertexId id) const noexcept
+    bool DynamicGraph<VertexData, EdgeData, GraphData>::vertexExists(VertexId id) const noexcept
     {
         if (id.graphId != graphId_ || id.index >= vertexSlots_.size() || !vertexSlots_[id.index].vertex.has_value() || id.generation != vertexSlots_[id.index].generation)
         {
@@ -278,7 +278,7 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::size_t Graph<VertexData, EdgeData, GraphData>::degree(VertexId id) const
+    std::size_t DynamicGraph<VertexData, EdgeData, GraphData>::degree(VertexId id) const
     {
         if (!vertexExists(id))
         {
@@ -288,7 +288,7 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::span<const typename Graph<VertexData, EdgeData, GraphData>::Adjacency> Graph<VertexData, EdgeData, GraphData>::adjacency(VertexId id) const
+    std::span<const typename DynamicGraph<VertexData, EdgeData, GraphData>::Adjacency> DynamicGraph<VertexData, EdgeData, GraphData>::adjacency(VertexId id) const
     {
         if (!vertexExists(id))
         {
@@ -299,7 +299,7 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    VertexData &Graph<VertexData, EdgeData, GraphData>::vertexData(VertexId id)
+    VertexData &DynamicGraph<VertexData, EdgeData, GraphData>::vertexData(VertexId id)
     {
         if (!vertexExists(id))
         {
@@ -309,7 +309,7 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    const VertexData &Graph<VertexData, EdgeData, GraphData>::vertexData(VertexId id) const
+    const VertexData &DynamicGraph<VertexData, EdgeData, GraphData>::vertexData(VertexId id) const
     {
         if (!vertexExists(id))
         {
@@ -320,20 +320,20 @@ namespace simple_undirected_graph
 
     // if edge data type is no properties, this allows edgeAdd(u,v)
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool> Graph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v)
+    std::pair<typename DynamicGraph<VertexData, EdgeData, GraphData>::EdgeId, bool> DynamicGraph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v)
         requires std::same_as<EdgeData, NoProperties>
     {
         return insertEdge(u, v);
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool> Graph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v, const EdgeData &edgeData)
+    std::pair<typename DynamicGraph<VertexData, EdgeData, GraphData>::EdgeId, bool> DynamicGraph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v, const EdgeData &edgeData)
     {
         return insertEdge(u, v, edgeData);
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool> Graph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v, EdgeData &&edgeData)
+    std::pair<typename DynamicGraph<VertexData, EdgeData, GraphData>::EdgeId, bool> DynamicGraph<VertexData, EdgeData, GraphData>::addEdge(VertexId u, VertexId v, EdgeData &&edgeData)
     {
         return insertEdge(u, v, std::move(edgeData));
     }
@@ -341,13 +341,13 @@ namespace simple_undirected_graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     template <typename... Args>
         requires std::constructible_from<EdgeData, Args...>
-    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool> Graph<VertexData, EdgeData, GraphData>::emplaceEdge(VertexId u, VertexId v, Args &&...args)
+    std::pair<typename DynamicGraph<VertexData, EdgeData, GraphData>::EdgeId, bool> DynamicGraph<VertexData, EdgeData, GraphData>::emplaceEdge(VertexId u, VertexId v, Args &&...args)
     {
         return insertEdge(u, v, std::forward<Args>(args)...);
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    bool Graph<VertexData, EdgeData, GraphData>::removeEdge(EdgeId id)
+    bool DynamicGraph<VertexData, EdgeData, GraphData>::removeEdge(EdgeId id)
     {
         if (!edgeExists(id))
         {
@@ -420,13 +420,13 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::size_t Graph<VertexData, EdgeData, GraphData>::edgeCount() const noexcept
+    std::size_t DynamicGraph<VertexData, EdgeData, GraphData>::edgeCount() const noexcept
     {
         return liveEdges_.size();
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    bool Graph<VertexData, EdgeData, GraphData>::edgeExists(EdgeId id) const noexcept
+    bool DynamicGraph<VertexData, EdgeData, GraphData>::edgeExists(EdgeId id) const noexcept
     {
         if (id.graphId != graphId_ || id.index >= edgeSlots_.size() || !edgeSlots_[id.index].edge.has_value() || id.generation != edgeSlots_[id.index].generation)
         {
@@ -436,7 +436,7 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    bool Graph<VertexData, EdgeData, GraphData>::hasEdge(VertexId u, VertexId v) const
+    bool DynamicGraph<VertexData, EdgeData, GraphData>::hasEdge(VertexId u, VertexId v) const
     {
         if (!vertexExists(u) || !vertexExists(v))
         {
@@ -446,8 +446,8 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::optional<typename Graph<VertexData, EdgeData, GraphData>::EdgeId>
-    Graph<VertexData, EdgeData, GraphData>::findEdgeId(VertexId u, VertexId v) const
+    std::optional<typename DynamicGraph<VertexData, EdgeData, GraphData>::EdgeId>
+    DynamicGraph<VertexData, EdgeData, GraphData>::findEdgeId(VertexId u, VertexId v) const
     {
         if (!vertexExists(u) || !vertexExists(v))
         {
@@ -463,7 +463,7 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    EdgeData &Graph<VertexData, EdgeData, GraphData>::edgeData(EdgeId id)
+    EdgeData &DynamicGraph<VertexData, EdgeData, GraphData>::edgeData(EdgeId id)
     {
         if (!edgeExists(id))
         {
@@ -474,7 +474,7 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    const EdgeData &Graph<VertexData, EdgeData, GraphData>::edgeData(EdgeId id) const
+    const EdgeData &DynamicGraph<VertexData, EdgeData, GraphData>::edgeData(EdgeId id) const
     {
         if (!edgeExists(id))
         {
@@ -485,7 +485,7 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::pair<typename Graph<VertexData, EdgeData, GraphData>::VertexId, typename Graph<VertexData, EdgeData, GraphData>::VertexId> Graph<VertexData, EdgeData, GraphData>::endpoints(EdgeId id) const
+    std::pair<typename DynamicGraph<VertexData, EdgeData, GraphData>::VertexId, typename DynamicGraph<VertexData, EdgeData, GraphData>::VertexId> DynamicGraph<VertexData, EdgeData, GraphData>::endpoints(EdgeId id) const
     {
         if (!edgeExists(id))
         {
@@ -497,13 +497,13 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::span<const typename Graph<VertexData, EdgeData, GraphData>::VertexId> Graph<VertexData, EdgeData, GraphData>::vertices() const noexcept
+    std::span<const typename DynamicGraph<VertexData, EdgeData, GraphData>::VertexId> DynamicGraph<VertexData, EdgeData, GraphData>::vertices() const noexcept
     {
         return liveVertices_;
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::span<const typename Graph<VertexData, EdgeData, GraphData>::EdgeId> Graph<VertexData, EdgeData, GraphData>::edges() const noexcept
+    std::span<const typename DynamicGraph<VertexData, EdgeData, GraphData>::EdgeId> DynamicGraph<VertexData, EdgeData, GraphData>::edges() const noexcept
     {
         return liveEdges_;
     }
@@ -519,7 +519,7 @@ namespace simple_undirected_graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     template <typename... Args>
         requires std::constructible_from<VertexData, Args...>
-    typename Graph<VertexData, EdgeData, GraphData>::VertexId Graph<VertexData, EdgeData, GraphData>::insertVertex(Args &&...args)
+    typename DynamicGraph<VertexData, EdgeData, GraphData>::VertexId DynamicGraph<VertexData, EdgeData, GraphData>::insertVertex(Args &&...args)
     {
         const bool reuseSlot = !freeVertexSlots_.empty();
 
@@ -588,7 +588,7 @@ namespace simple_undirected_graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     template <typename... Args>
         requires std::constructible_from<EdgeData, Args...>
-    std::pair<typename Graph<VertexData, EdgeData, GraphData>::EdgeId, bool> Graph<VertexData, EdgeData, GraphData>::insertEdge(VertexId u, VertexId v, Args &&...args)
+    std::pair<typename DynamicGraph<VertexData, EdgeData, GraphData>::EdgeId, bool> DynamicGraph<VertexData, EdgeData, GraphData>::insertEdge(VertexId u, VertexId v, Args &&...args)
     {
         if (!vertexExists(u) || !vertexExists(v))
         {
@@ -696,23 +696,23 @@ namespace simple_undirected_graph
     template <typename VertexData, typename EdgeData, typename GraphData>
     template <typename... Args>
         requires std::constructible_from<VertexData, Args...>
-    Graph<VertexData, EdgeData, GraphData>::Vertex::Vertex(std::in_place_t, Args &&...args) : data(std::forward<Args>(args)...), adjacency{}
+    DynamicGraph<VertexData, EdgeData, GraphData>::Vertex::Vertex(std::in_place_t, Args &&...args) : data(std::forward<Args>(args)...), adjacency{}
     {
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
     template <typename... Args>
         requires std::constructible_from<EdgeData, Args...>
-    Graph<VertexData, EdgeData, GraphData>::Edge::Edge(VertexId u, VertexId v, std::size_t adjacencyIndexU, std::size_t adjacencyIndexV, std::in_place_t, Args &&...args) : endpointU(u),
-                                                                                                                                                                            endpointV(v),
-                                                                                                                                                                            data(std::forward<Args>(args)...),
-                                                                                                                                                                            adjacencyIndexU(adjacencyIndexU),
-                                                                                                                                                                            adjacencyIndexV(adjacencyIndexV)
+    DynamicGraph<VertexData, EdgeData, GraphData>::Edge::Edge(VertexId u, VertexId v, std::size_t adjacencyIndexU, std::size_t adjacencyIndexV, std::in_place_t, Args &&...args) : endpointU(u),
+                                                                                                                                                                                   endpointV(v),
+                                                                                                                                                                                   data(std::forward<Args>(args)...),
+                                                                                                                                                                                   adjacencyIndexU(adjacencyIndexU),
+                                                                                                                                                                                   adjacencyIndexV(adjacencyIndexV)
     {
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    typename Graph<VertexData, EdgeData, GraphData>::EndpointPair Graph<VertexData, EdgeData, GraphData>::normalizeEndpoints(VertexId u, VertexId v) const noexcept
+    typename DynamicGraph<VertexData, EdgeData, GraphData>::EndpointPair DynamicGraph<VertexData, EdgeData, GraphData>::normalizeEndpoints(VertexId u, VertexId v) const noexcept
     {
         std::size_t endpointIndexA = u.index;
         std::size_t endpointIndexB = v.index;
@@ -726,7 +726,7 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::size_t Graph<VertexData, EdgeData, GraphData>::combineHash(std::size_t seed, std::size_t value) noexcept
+    std::size_t DynamicGraph<VertexData, EdgeData, GraphData>::combineHash(std::size_t seed, std::size_t value) noexcept
     {
         // simple baseline mixer. TODO: replace after benchmarking hash strategies
         constexpr std::size_t bitCount = sizeof(std::size_t) * 8;
@@ -740,12 +740,12 @@ namespace simple_undirected_graph
     }
 
     template <typename VertexData, typename EdgeData, typename GraphData>
-    std::size_t Graph<VertexData, EdgeData, GraphData>::EndpointPairHasher::operator()(const EndpointPair &pair) const noexcept
+    std::size_t DynamicGraph<VertexData, EdgeData, GraphData>::EndpointPairHasher::operator()(const EndpointPair &pair) const noexcept
     {
         std::size_t seed = 0;
 
-        seed = Graph::combineHash(seed, pair.first);
-        seed = Graph::combineHash(seed, pair.second);
+        seed = DynamicGraph::combineHash(seed, pair.first);
+        seed = DynamicGraph::combineHash(seed, pair.second);
 
         return seed;
     }

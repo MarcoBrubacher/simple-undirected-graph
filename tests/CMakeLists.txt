@@ -4,14 +4,21 @@ add_subdirectory(
 )
 
 set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
-    core/test_graph.cpp
-    core/test_vertices.cpp
-    core/test_edges.cpp
-    core/test_adjacency.cpp
-    core/test_iteration.cpp
-    core/test_ids.cpp
-    core/test_exception_safety.cpp
-    core/test_copy_move.cpp
+    dynamic_graph/test_graph.cpp
+    dynamic_graph/test_vertices.cpp
+    dynamic_graph/test_edges.cpp
+    dynamic_graph/test_adjacency.cpp
+    dynamic_graph/test_iteration.cpp
+    dynamic_graph/test_ids.cpp
+    dynamic_graph/test_exception_safety.cpp
+    dynamic_graph/test_copy_move.cpp
+
+    csr_graph/test_graph.cpp
+    csr_graph/test_csr_format.cpp
+    csr_graph/test_adjacency.cpp
+    csr_graph/test_copy_move.cpp
+
+    conversion/test_conversion.cpp
 )
 
 add_executable(

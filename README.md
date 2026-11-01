@@ -1,23 +1,29 @@
 # simple-undirected-graph
 
-A small header-only C++20 library for finite simple undirected graphs, with optional data attached to vertices, edges, and the graph itself.
+A small C++20 library for finite simple undirected graphs, with optional data attached to vertices, edges, and the graph itself.
 
-## Graph model
+## Graph representations
 
-The library represents finite simple undirected graphs:
+### DynamicGraph
 
-- vertices cannot have self-loops
-- there can be at most one edge between any pair of vertices
-- each undirected edge is represented once
+`DynamicGraph` stores a mutable graph topology. Vertices and edges can be added or removed after construction, while graph, vertex, and edge data remain mutable. It is designed for efficient graph construction and modification.
 
-## Access and traversal
+### CSRGraph
 
-Vertices and edges are accessed through IDs rather than references into the internal storage. The API supports:
+`CSRGraph` stores a fixed topology in CSR format. Its topology cannot be modified after construction, but graph, vertex, and edge data remain mutable. It is designed for a more compact storage and efficient graph traversal.
 
-- iteration over existing vertices and edges
-- adjacency access
-- vertex, edge, and graph data
-- edge lookup by endpoints
+In addition to the standard CSR arrays, it stores an edge ID for each adjacency entry, linking each vertex-neighbor connection to its corresponding edge. Both adjacency entries of an undirected edge reference the same edge ID, allowing edge properties to be stored only once and accessed directly during traversal.
+
+Edge endpoints are not stored permanently to minimize memory usage. Instead, the `reconstructEdgeEndpoints()` function reconstructs the endpoints of each edge, indexed by its edge ID, when needed for edge-based processing.
+
+## Graph conversion
+
+`Conversion` supports conversion between `DynamicGraph` and `CSRGraph` in both directions.
+
+- `toCSRGraph()` converts a dynamic graph to CSR format.
+- `toDynamicGraph()` converts a CSR graph to a dynamic graph.
+
+Both functions support copy and move semantics. Conversions preserve graph properties.
 
 ## Requirements
 
@@ -49,11 +55,7 @@ ctest --test-dir build -C Debug --output-on-failure
 
 ## Current work
 
-- Implement graph I/O for loading graph data from external files, starting with TUDataset
-- Implement a structurally frozen graph representation using CSR, optimized for traversal while allowing vertex, edge, and graph properties to be modified
-- Support loading graph data directly into either mutable `Graph` or CSR-based `FrozenGraph` representations
-- Support freezing existing graphs and converting frozen graphs back into mutable graphs when structural modifications are required
-- Optimize direct CSR construction to avoid unnecessary intermediate graph representations
+- Implement graph I/O for loading graph data from external files, starting with TU Dataset
 
 ## Planned extensions
 
