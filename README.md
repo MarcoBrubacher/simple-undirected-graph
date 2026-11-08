@@ -18,6 +18,7 @@ In addition to the standard CSR arrays, it stores an edge ID for each adjacency 
 
 Edge endpoints are not stored permanently to minimize memory usage. Instead, the `reconstructEdgeEndpoints()` function reconstructs the endpoints of each edge, indexed by its edge ID, when needed for edge-based processing.
 
+CSRGraph prioritizes traversal performance and assumes that callers provide valid vertex and edge indices. Indexed accessors do not perform bounds checking, so callers must respect the preconditions. External CSR data should be validated using `isValidCSRFormat()` before being passed to `fromValidCSRFormat()`.
 
 ## Graph conversion
 
@@ -25,8 +26,6 @@ Conversion supports conversion between DynamicGraph and CSRGraph in both directi
 
 - `toCSRGraph()` converts a dynamic graph to CSR format.
 - `toDynamicGraph()` converts a CSR graph to a dynamic graph.
-
-Both functions support copy and move semantics. Conversions preserve graph properties.
 
 
 ## Example
