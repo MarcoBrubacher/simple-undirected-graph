@@ -7,7 +7,7 @@ A small C++20 library for finite simple undirected graphs, with optional data at
 
 ### DynamicGraph
 
-DynamicGraph stores a mutable graph topology. Vertices and edges can be added or removed after construction, while graph, vertex, and edge data remain mutable. It is designed for efficient graph construction and modification.
+DynamicGraph stores a mutable graph topology. Vertices and edges can be added or removed after construction, while graph, vertex, and edge data remain mutable. It is designed for graph construction and modification.
 
 
 ### CSRGraph
