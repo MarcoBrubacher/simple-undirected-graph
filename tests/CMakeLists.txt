@@ -12,12 +12,10 @@ set(SIMPLE_UNDIRECTED_GRAPH_TEST_SOURCES
     dynamic_graph/test_ids.cpp
     dynamic_graph/test_exception_safety.cpp
     dynamic_graph/test_copy_move.cpp
-
     csr_graph/test_graph.cpp
     csr_graph/test_csr_format.cpp
     csr_graph/test_adjacency.cpp
     csr_graph/test_copy_move.cpp
-
     conversion/test_conversion.cpp
 )
 
@@ -29,14 +27,13 @@ add_executable(
 target_link_libraries(
     simple_undirected_graph_tests
     PRIVATE
-    simple_undirected_graph::simple_undirected_graph
-    Catch2::Catch2WithMain
+        simple_undirected_graph::simple_undirected_graph
+        Catch2::Catch2WithMain
 )
 
 target_include_directories(
     simple_undirected_graph_tests
-    PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/external/Catch2/extras)
