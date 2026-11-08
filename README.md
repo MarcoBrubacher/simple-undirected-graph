@@ -44,9 +44,6 @@ int main()
 }
 ```
 
-This example creates a simple undirected graph containing two vertices
-connected by one edge.
-
 
 ## Using the library
 
