@@ -1,0 +1,5 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/simple_undirected_graphTargets.cmake")
+
+check_required_components(simple_undirected_graph)
