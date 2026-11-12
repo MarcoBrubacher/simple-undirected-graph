@@ -117,7 +117,7 @@ The external/ directory contains third-party code used for development and testi
 
 ## Planned extensions
 
-- Implement graph I/O for loading graph data from external files, starting with TU Dataset
-- Support additional commonly used graph-data formats
+- Implement graph I/O for loading graph data from external files
+- build a showcase adapter for TUDataset
 - Add benchmarks and investigate performance, including hash collision behavior
 - Rendering graphs
